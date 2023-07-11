@@ -1,0 +1,140 @@
+@page "/search"
+@inject HttpClient Http
+
+<PageTitle>Search Hashtag</PageTitle>
+
+<h1>Search Hashtag</h1>
+
+<p>This component demonstrates fetching data from the server.</p>
+
+<div class="user-info">
+    @if (!string.IsNullOrEmpty(currentUser))
+    {
+        <p>Logged in as: <strong>@currentUser</strong></p>
+    }
+    else
+    {
+        <p>Not logged in.</p>
+    }
+</div>
+
+<form class="search-form">
+    <div class="search-bar">
+        <input type="text" class="form-control" id="searchInput" @bind="@searchTerm" placeholder="Enter your search term" />
+        <datalist id="nameSuggestions">
+            @foreach (var suggestion in GetSearchSuggestions())
+            {
+                <option value="@suggestion" />
+            }
+        </datalist>
+    </div>
+    <button type="button" class="btn btn-primary search-button" @onclick="PerformSearch">Search</button>
+</form>
+
+@if (hashtags == null)
+{
+    <p><em>Loading...</em></p>
+}
+else if (hashtags.Length == 0)
+{
+    <p>No results found.</p>
+}
+else
+{
+    <div class="hashtag-container">
+        @foreach (var hashtag in hashtags)
+        {
+            <div class="hashtag-box">
+                <img src="@hashtag.PhotoUrl" alt="Hashtag Photo" class="hashtag-image" />
+                <h3>@hashtag.Name</h3>
+                <p>@hashtag.Summary</p>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    private SearchTerm[] allHashtags;
+    private SearchTerm[] hashtags;
+    private string searchTerm;
+    private string currentUser = "John";
+
+    protected override async Task OnInitializedAsync()
+    {
+        allHashtags = await Http.GetFromJsonAsync<SearchTerm[]>("sample-data/weather.json");
+        hashtags = allHashtags;
+    }
+
+    private IEnumerable<string> GetSearchSuggestions()
+    {
+        return allHashtags.Select(h => h.Name).Distinct();
+    }
+
+    private void PerformSearch()
+    {
+        if (string.IsNullOrEmpty(searchTerm))
+        {
+            hashtags = allHashtags;
+        }
+        else
+        {
+            hashtags = allHashtags.Where(h => h.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)).ToArray();
+        }
+    }
+
+    public class SearchTerm
+    {
+        public DateTime Date { get; set; }
+        public string Name { get; set; }
+        public string Summary { get; set; }
+        public string PhotoUrl { get; set; }
+    }
+}
+
+<style>
+    .hashtag-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .hashtag-box {
+        margin: 10px;
+        padding: 10px;
+        border: 1px solid #ccc;
+        width: 300px;
+    }
+
+    .hashtag-image {
+        width: 100%;
+        height: auto;
+    }
+
+    .user-info {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+    }
+
+    .search-form {
+        display: flex;
+        align-items: flex-end;
+        margin-top: 20px;
+    }
+
+    .search-bar {
+        position: relative;
+    }
+
+    .search-icon {
+        position: absolute;
+        top: 50%;
+        left: 10px;
+        transform: translateY(-50%);
+        color: #6c757d;
+    }
+
+    .search-button {
+        width: auto;
+    }
+</style>

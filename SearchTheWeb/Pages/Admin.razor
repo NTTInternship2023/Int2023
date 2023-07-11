@@ -1,0 +1,296 @@
+@page "/admin"
+@inject HttpClient Http
+
+<PageTitle>Admin</PageTitle>
+
+<h1>Admin Page</h1>
+
+<div class="user-info">
+    @if (!string.IsNullOrEmpty(currentUser))
+    {
+        <p>Logged in as: <strong>@currentUser</strong></p>
+    }
+    else
+    {
+        <p>Not logged in.</p>
+    }
+</div>
+
+<form class="search-form">
+    <div class="search-bar">
+        <input type="text" class="form-control" id="searchInput" list="nameSuggestions" @bind="@searchTerm" placeholder="Enter your search term" />
+        @if (string.IsNullOrEmpty(searchTerm))
+        {
+            <span class="search-icon">
+                <i class="bi bi-search"></i>
+            </span>
+        }
+    </div>
+    <button type="button" class="btn btn-primary search-button" @onclick="PerformSearch">Search</button>
+</form>
+
+<div class="admin-actions">
+    <button type="button" class="btn btn-success add-button" @onclick="OpenAddHashtagPopup">Add Hashtag</button>
+    <button type="button" class="btn btn-primary view-activity-button" @onclick="ToggleUserActivity">View User Activity</button>
+    <button type="button" class="btn btn-primary show-hide-button" @onclick="ToggleShowHidePosts">Show/Hide Posts</button>
+</div>
+
+@if (hashtags == null)
+{
+    <p><em>Loading...</em></p>
+}
+else if (hashtags.Length == 0)
+{
+    <p>No results found.</p>
+}
+else
+{
+    <div class="hashtag-container" style="display: @(showPosts ? "flex" : "none")">
+        @foreach (var hashtag in hashtags)
+        {
+            <div class="hashtag-box">
+                <img src="@hashtag.PhotoUrl" alt="Hashtag Photo" class="hashtag-image" />
+                <h3>@hashtag.Name</h3>
+                <p>@hashtag.Summary</p>
+                @if (showPosts)
+                {
+                    <button class="btn btn-danger delete-button" @onclick="() => DeleteHashtag(hashtag)">Delete</button>
+                }
+            </div>
+        }
+    </div>
+}
+
+@if (showUserActivity)
+{
+    <div class="user-activity">
+        <h2>User Activity</h2>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Name</th>
+                    <th>Recent Activity</th>
+                    <th>Details</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var user in users)
+                {
+                    <tr>
+                        <td>@user.Date</td>
+                        <td>@user.Name</td>
+                        <td>@user.RecentActivity</td>
+                        <td>@user.Details</td>
+                    </tr>
+                    @if (user.ShowDetails)
+                    {
+                        <tr>
+                            <td colspan="4">Details: @user.Details</td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+@if (showAddHashtagPopup)
+{
+    <div class="add-hashtag-popup">
+        <h2>Add Hashtag</h2>
+        <div class="form-group">
+            <label for="photoUrlInput">Photo URL:</label>
+            <input type="text" class="form-control" id="photoUrlInput" @bind="@newHashtag.PhotoUrl" />
+        </div>
+        <div class="form-group">
+            <label for="nameInput">Name:</label>
+            <input type="text" class="form-control" id="nameInput" @bind="@newHashtag.Name" />
+        </div>
+        <div class="form-group">
+            <label for="summaryInput">Summary:</label>
+            <textarea class="form-control" id="summaryInput" rows="3" @bind="@newHashtag.Summary"></textarea>
+        </div>
+        <button type="button" class="btn btn-primary" @onclick="AddHashtag">Add</button>
+        <button type="button" class="btn btn-secondary" @onclick="CloseAddHashtagPopup">Cancel</button>
+    </div>
+}
+
+@code {
+    private SearchTerm[] allHashtags;
+    private SearchTerm[] hashtags;
+    private string searchTerm;
+    private string currentUser = "John";
+    private SearchTerm newHashtag;
+    private bool showAddHashtagPopup = false;
+    private bool showUserActivity = false;
+    private UserActivity[] users;
+    private bool showPosts = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        allHashtags = await Http.GetFromJsonAsync<SearchTerm[]>("sample-data/weather.json");
+        hashtags = allHashtags;
+        newHashtag = new SearchTerm();
+
+        // Dummy data for user activity
+        users = new UserActivity[]
+        {
+            new UserActivity { Date = DateTime.Now.AddDays(-1), Name = "John", RecentActivity = "Search", Details = "Details 1" },
+            new UserActivity { Date = DateTime.Now.AddDays(-2), Name = "Jane", RecentActivity = "Logout", Details = "Details 2" },
+            new UserActivity { Date = DateTime.Now.AddDays(-3), Name = "Bob", RecentActivity = "Add", Details = "Details 3" }
+        };
+    }
+
+    private IEnumerable<string> GetAvailableNames()
+    {
+        return allHashtags.Select(h => h.Name).Distinct();
+    }
+
+    private void PerformSearch()
+    {
+        if (string.IsNullOrEmpty(searchTerm))
+        {
+            hashtags = allHashtags;
+        }
+        else
+        {
+            hashtags = allHashtags.Where(h => h.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)).ToArray();
+        }
+    }
+
+    private void OpenAddHashtagPopup()
+    {
+        showAddHashtagPopup = true;
+    }
+
+    private void CloseAddHashtagPopup()
+    {
+        showAddHashtagPopup = false;
+    }
+
+    private void AddHashtag()
+    {
+        // Perform the logic to add the new hashtag
+        // You can access the new hashtag details via the `newHashtag` property
+        // After adding the hashtag, you can close the popup by calling `CloseAddHashtagPopup()`
+    }
+
+    private void ToggleUserActivity()
+    {
+        showUserActivity = !showUserActivity;
+    }
+
+    private void ToggleShowHidePosts()
+    {
+        showPosts = !showPosts;
+    }
+
+    private void DeleteHashtag(SearchTerm hashtag)
+    {
+        // Perform the logic to delete the hashtag
+    }
+
+    public class SearchTerm
+    {
+        public DateTime Date { get; set; }
+        public string Name { get; set; }
+        public string Summary { get; set; }
+        public string PhotoUrl { get; set; }
+    }
+
+    public class UserActivity
+    {
+        public DateTime Date { get; set; }
+        public string Name { get; set; }
+        public string RecentActivity { get; set; }
+        public string Details { get; set; }
+        public bool ShowDetails { get; set; } = false;
+    }
+}
+
+<style>
+    .hashtag-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .hashtag-box {
+        margin: 10px;
+        padding: 10px;
+        border: 1px solid #ccc;
+        position: relative;
+    }
+
+    .hashtag-image {
+        width: 300px;
+        height: auto;
+    }
+
+    .user-info {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+    }
+
+    .search-form {
+        display: flex;
+        align-items: flex-end;
+        margin-top: 20px;
+    }
+
+    .search-bar {
+        position: relative;
+    }
+
+    .search-icon {
+        position: absolute;
+        top: 50%;
+        left: 10px;
+        transform: translateY(-50%);
+        color: #6c757d;
+    }
+
+    .search-button {
+        width: auto;
+    }
+
+    .admin-actions {
+        margin-top: 20px;
+    }
+
+    .add-button {
+        width: auto;
+    }
+
+    .view-activity-button {
+        width: auto;
+    }
+
+    .show-hide-button {
+        width: auto;
+    }
+
+    .user-activity {
+        margin-top: 20px;
+    }
+
+    .add-hashtag-popup {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        padding: 20px;
+        background-color: #fff;
+        border: 1px solid #ccc;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    }
+
+    .delete-button {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        display: @(showPosts ? "block" : "none");
+    }
+</style>
