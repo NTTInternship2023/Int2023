@@ -1,24 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "D:\\Internship2023\\SearchTheWebServer\\SearchTheWebServer.csproj": {}
+    "E:\\_NTT\\ProiectFinal\\Internship2023\\SearchTheWebServer\\SearchTheWebServer.csproj": {}
   },
   "projects": {
-    "D:\\Internship2023\\SearchTheWebServer\\SearchTheWebServer.csproj": {
+    "E:\\_NTT\\ProiectFinal\\Internship2023\\SearchTheWebServer\\SearchTheWebServer.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\Internship2023\\SearchTheWebServer\\SearchTheWebServer.csproj",
+        "projectUniqueName": "E:\\_NTT\\ProiectFinal\\Internship2023\\SearchTheWebServer\\SearchTheWebServer.csproj",
         "projectName": "SearchTheWebServer",
-        "projectPath": "D:\\Internship2023\\SearchTheWebServer\\SearchTheWebServer.csproj",
-        "packagesPath": "C:\\Users\\octav\\.nuget\\packages\\",
-        "outputPath": "D:\\Internship2023\\SearchTheWebServer\\obj\\",
+        "projectPath": "E:\\_NTT\\ProiectFinal\\Internship2023\\SearchTheWebServer\\SearchTheWebServer.csproj",
+        "packagesPath": "C:\\Users\\Alex\\.nuget\\packages\\",
+        "outputPath": "E:\\_NTT\\ProiectFinal\\Internship2023\\SearchTheWebServer\\obj\\",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "D:\\Programs\\Visual Studio 2023 3\\NuGetPackages"
-        ],
         "configFilePaths": [
-          "C:\\Users\\octav\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Users\\Alex\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -26,8 +22,7 @@
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-          "C:\\Program Files\\dotnet\\library-packs": {},
-          "C:\\Program Files\\dotnet\\sdk\\7.0.305\\Sdks\\Microsoft.NET.Sdk.Web\\library-packs": {},
+          "C:\\Program Files\\dotnet\\sdk\\7.0.304\\Sdks\\Microsoft.NET.Sdk.Web\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -80,7 +75,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.305\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.304\\RuntimeIdentifierGraph.json"
         }
       }
     }
