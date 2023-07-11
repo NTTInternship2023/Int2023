@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using SearchTheWebServer.Data;
 using SearchTheWebServer.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 
 namespace SearchTheWebServer.Controller
 {
@@ -23,6 +24,21 @@ namespace SearchTheWebServer.Controller
         [Route("GetAll")]
         public async Task<ActionResult<List<SearchLog>>> GetAll(){
             return (await _db.SearchLogs.ToListAsync()).ToList();
+        }
+
+        [HttpGet]
+        [Route("GetLast")]
+        public async Task<SearchLog> GetLast(){
+           var LastLog = await _db.SearchLogs.OrderByDescending(x => x.Id).FirstAsync();
+           return LastLog;
+        }
+
+        [HttpPost]
+        [Route("Suggestions")]
+        public async Task<ActionResult<List<SearchLog>>> GetSearchSuggestions([FromBody]string hint){
+            Console.WriteLine(hint);
+            var searchSuggestions = (await _db.SearchLogs.Where(w=>w.ActionDetail.StartsWith(hint)).ToListAsync()).ToList();
+            return searchSuggestions;
         }
     }
 }
