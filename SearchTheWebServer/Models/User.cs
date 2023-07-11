@@ -7,8 +7,10 @@ public class User
     public string Username { get; set; } = "";
 
     public string Email { get; set; } = "";
-        
-    public string Password { get; set; } = "";
+    
+    public byte[] PasswordHash { get; set; } = Array.Empty<byte>();
+    
+    public byte[] PasswordSalt { get; set; } = Array.Empty<byte>();
 
     public bool IsAdmin { get; set; } = false;
 }
