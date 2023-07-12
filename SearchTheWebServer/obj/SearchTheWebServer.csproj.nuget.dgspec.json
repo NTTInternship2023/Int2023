@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "E:\\_NTT\\ProiectFinal\\Internship2023\\SearchTheWebServer\\SearchTheWebServer.csproj": {}
+    "e:\\_NTT\\ProiectFinal\\Internship2023\\SearchTheWebServer\\SearchTheWebServer.csproj": {}
   },
   "projects": {
-    "E:\\_NTT\\ProiectFinal\\Internship2023\\SearchTheWebServer\\SearchTheWebServer.csproj": {
+    "e:\\_NTT\\ProiectFinal\\Internship2023\\SearchTheWebServer\\SearchTheWebServer.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "E:\\_NTT\\ProiectFinal\\Internship2023\\SearchTheWebServer\\SearchTheWebServer.csproj",
+        "projectUniqueName": "e:\\_NTT\\ProiectFinal\\Internship2023\\SearchTheWebServer\\SearchTheWebServer.csproj",
         "projectName": "SearchTheWebServer",
-        "projectPath": "E:\\_NTT\\ProiectFinal\\Internship2023\\SearchTheWebServer\\SearchTheWebServer.csproj",
+        "projectPath": "e:\\_NTT\\ProiectFinal\\Internship2023\\SearchTheWebServer\\SearchTheWebServer.csproj",
         "packagesPath": "C:\\Users\\Alex\\.nuget\\packages\\",
-        "outputPath": "E:\\_NTT\\ProiectFinal\\Internship2023\\SearchTheWebServer\\obj\\",
+        "outputPath": "e:\\_NTT\\ProiectFinal\\Internship2023\\SearchTheWebServer\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\Alex\\AppData\\Roaming\\NuGet\\NuGet.Config",

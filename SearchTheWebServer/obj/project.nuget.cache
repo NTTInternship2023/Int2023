@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "ORVRoJbIR72d8NZF7TVl7rmWZsWHM0NUrKpU8roNOP1EEoHJme+mPCx9JhGBO2jPkApQ2wOtQKqcVepxpxgfNg==",
+  "dgSpecHash": "ZPZkZrvoWaXjGvzzim5tmpvRzf+0mlb+gQW37smPrIrG6v4Mb9Y9s/89dwMy1fuXXKqI9lRb1LA87XerRJZTQA==",
   "success": true,
-  "projectFilePath": "E:\\_NTT\\ProiectFinal\\Internship2023\\SearchTheWebServer\\SearchTheWebServer.csproj",
+  "projectFilePath": "e:\\_NTT\\ProiectFinal\\Internship2023\\SearchTheWebServer\\SearchTheWebServer.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Alex\\.nuget\\packages\\azure.core\\1.24.0\\azure.core.1.24.0.nupkg.sha512",
     "C:\\Users\\Alex\\.nuget\\packages\\azure.identity\\1.6.0\\azure.identity.1.6.0.nupkg.sha512",
