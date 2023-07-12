@@ -7,6 +7,7 @@ using SearchTheWebServer.Data;
 using SearchTheWebServer.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
+using Microsoft.AspNetCore.Identity;
 
 namespace SearchTheWebServer.Controller
 {
@@ -39,6 +40,25 @@ namespace SearchTheWebServer.Controller
             Console.WriteLine(hint);
             var searchSuggestions = (await _db.SearchLogs.Where(w=>w.ActionDetail.StartsWith(hint)).ToListAsync()).ToList();
             return searchSuggestions;
+        }
+
+        [HttpPost]
+        [Route("LogAction")]
+        public async Task<ActionResult<SearchLog>> LogAction([FromBody]SearchLogDTO searchLogDTO){
+            try{
+                SearchLog newSearchLog = new()
+                {
+                    IdUser = searchLogDTO.IdUser,
+                    Date = searchLogDTO.Date,
+                    Action = searchLogDTO.Action,
+                    ActionDetail = searchLogDTO.ActionDetail
+                };
+                _db.SearchLogs.Add(newSearchLog);
+                await _db.SaveChangesAsync();
+                return Ok($"Search for {searchLogDTO.ActionDetail}");
+            }catch(Exception ex){
+                return StatusCode(500,$"Error save log: {ex.Message}");
+            }
         }
     }
 }
