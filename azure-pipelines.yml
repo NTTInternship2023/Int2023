@@ -10,16 +10,14 @@ pool:
   vmImage: ubuntu-latest
 
 steps:
-- script: Building Search The Web solution
-  displayName: 'Run a one-line script'
+- script: dotnet build  /SearchTheWeb/*.csproj
+  displayName: 'dotnet build SearchTheWeb csproj'
 
-- script: |
-    echo Add other tasks to build, test, and deploy your project.
-    echo See https://aka.ms/yaml
-  displayName: 'Run a multi-line script'
+
 - task: DotNetCoreCLI@2
   inputs:
     command: 'build'
-    projects: '/SearchTheWebServer/*.sln'
+    projects: '/SearchTheWebServer/*.csproj'
+  
 
 
