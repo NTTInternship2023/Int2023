@@ -10,7 +10,7 @@ pool:
   vmImage: ubuntu-latest
 
 steps:
-- script: echo Hello, world!
+- script: Building Search The Web solution
   displayName: 'Run a one-line script'
 
 - script: |
@@ -20,8 +20,6 @@ steps:
 - task: DotNetCoreCLI@2
   inputs:
     command: 'build'
-    projects: '/SearchTheWebServer/*.csproj'
+    projects: '/SearchTheWebServer/*.sln'
 
-- script: dotnet build --configuration $(buildConfiguration) /SearchTheWeb/*.csproj
-  displayName: 'dotnet build $(buildConfiguration) SearchTheWeb'
 
