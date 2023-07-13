@@ -13,7 +13,7 @@ steps:
 - script: echo Build has started!
   displayName: 'Start building Solution'
 
-- script: dotnet build 'SearchTheWebServer/*.csproj'
+- script: dotnet build 'SearchTheWebServer'
   displayName: 'Building SearchTheWebServer project'
    
 - script: 'dotnet build SearchTheWeb'
