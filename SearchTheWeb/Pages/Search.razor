@@ -1,16 +1,21 @@
 @page "/search"
 @inject HttpClient Http
+@inject NavigationManager NavigationManager
 
 <PageTitle>Search Hashtag</PageTitle>
-
-<h1>Search Hashtag</h1>
-
-<p>This component demonstrates fetching data from the server.</p>
 
 <div class="user-info">
     @if (!string.IsNullOrEmpty(currentUser))
     {
-        <p>Logged in as: <strong>@currentUser</strong></p>
+        <p>Logged in as: <a class="user-link" @onclick="ShowUserPopup">@currentUser</a></p>
+        @if (showUserPopup)
+        {
+            <div class="user-popup">
+                <button class="popup-button" @onclick="CloseUserPopup">Log out</button>
+                <button class="popup-button" @onclick="CloseUserPopup">Change Password</button>
+            </div>
+            <div class="popup-overlay" @onclick="CloseUserPopup"></div>
+        }
     }
     else
     {
@@ -18,9 +23,14 @@
     }
 </div>
 
+
+<h1 class="search-heading">Search Hashtag</h1>
+
+<p>This component demonstrates fetching data from the server.</p>
+
 <form class="search-form">
     <div class="search-bar">
-        <input type="text" class="form-control" id="searchInput" @bind="@searchTerm" placeholder="Enter your search term" />
+        <input type="text" class="form-control search-input" id="searchInput" @bind="@searchTerm" placeholder="Enter your search term" />
         <datalist id="nameSuggestions">
             @foreach (var suggestion in GetSearchSuggestions())
             {
@@ -31,37 +41,45 @@
     <button type="button" class="btn btn-primary search-button" @onclick="PerformSearch">Search</button>
 </form>
 
-@if (hashtags == null)
+
+@if (!showUserPopup)  // Display hashtags only if user popup is not shown
 {
-    <p><em>Loading...</em></p>
+    if (hashtags == null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else if (hashtags.Length == 0)
+    {
+        <p>No results found.</p>
+    }
+    else
+    {
+        <div class="hashtag-container">
+            @foreach (var hashtag in hashtags)
+            {
+                <div class="hashtag-box">
+                    <img src="@hashtag.PhotoUrl" alt="Hashtag Photo" class="hashtag-image" />
+                    <h3>@hashtag.Name</h3>
+                    <p>@hashtag.Summary</p>
+                </div>
+            }
+        </div>
+    }
 }
-else if (hashtags.Length == 0)
-{
-    <p>No results found.</p>
-}
-else
-{
-    <div class="hashtag-container">
-        @foreach (var hashtag in hashtags)
-        {
-            <div class="hashtag-box">
-                <img src="@hashtag.PhotoUrl" alt="Hashtag Photo" class="hashtag-image" />
-                <h3>@hashtag.Name</h3>
-                <p>@hashtag.Summary</p>
-            </div>
-        }
-    </div>
-}
+
+
 
 @code {
     private SearchTerm[] allHashtags;
     private SearchTerm[] hashtags;
     private string searchTerm;
     private string currentUser = "John";
+    private bool showUserPopup = false;
 
     protected override async Task OnInitializedAsync()
     {
-        allHashtags = await Http.GetFromJsonAsync<SearchTerm[]>("sample-data/weather.json");
+        // Initialize data
+        allHashtags = await Http.GetFromJsonAsync<SearchTerm[]>("/sample-data/weather.json");
         hashtags = allHashtags;
     }
 
@@ -82,6 +100,16 @@ else
         }
     }
 
+    private void ShowUserPopup()
+    {
+        showUserPopup = true;
+    }
+
+    private void CloseUserPopup()
+    {
+        showUserPopup = false;
+    }
+
     public class SearchTerm
     {
         public DateTime Date { get; set; }
@@ -92,49 +120,96 @@ else
 }
 
 <style>
-    .hashtag-container {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-    }
-
-    .hashtag-box {
-        margin: 10px;
-        padding: 10px;
-        border: 1px solid #ccc;
-        width: 300px;
-    }
-
-    .hashtag-image {
-        width: 100%;
-        height: auto;
-    }
+    /* Styles for other elements */
 
     .user-info {
-        position: absolute;
-        top: 10px;
-        right: 10px;
+        text-align: right;
+        margin-top: 10px;
     }
 
-    .search-form {
-        display: flex;
-        align-items: flex-end;
-        margin-top: 20px;
+    .search-heading {
+        text-align: left;
     }
 
-    .search-bar {
-        position: relative;
+    /* User Popup Styles */
+    .user-popup {
+        position: fixed;
+        top: 60px;
+        right: 20px;
+        background-color: #fff;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        padding: 10px;
+        z-index: 9999;
     }
 
-    .search-icon {
-        position: absolute;
-        top: 50%;
-        left: 10px;
-        transform: translateY(-50%);
-        color: #6c757d;
+    .popup-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 9998;
     }
 
-    .search-button {
-        width: auto;
+    .popup-content {
+        margin-bottom: 10px;
+        cursor: pointer;
     }
+
+    .user-link {
+        cursor: pointer;
+        text-decoration: underline;
+    }
+   
+.search-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 20px;
+}
+
+.search-bar {
+    position: relative;
+    width: 200px; /* Adjust the width as desired */
+}
+
+.search-input {
+    width: 100%;
+}
+
+.hashtag-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.hashtag-box {
+    margin: 10px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    width: 300px;
+    text-align: center;
+}
+
+.hashtag-image {
+    width: 100%;
+    height: auto;
+    max-width: 200px; /* Adjust the maximum width as desired */
+}
+.popup-button {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    padding: 8px 16px;
+    margin-right: 10px;
+    cursor: pointer;
+}
+
+.popup-button:hover {
+    background-color: #0056b3;
+}
+
+
 </style>
