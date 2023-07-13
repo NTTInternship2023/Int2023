@@ -37,7 +37,7 @@ namespace SearchTheWebServer.Controller
                     return Conflict("Username already exists");
                 }
 
-                if (!PasswordValidator<>.PasswordPatternValidation(userDto.Password)) return Conflict("Invalid format for Password");
+                if (!PasswordValidator.PasswordPatternValidation(userDto.Password)) return Conflict("Invalid format for Password");
                 if (!EmailValidator.EmailPatternValidation(userDto.Email)) return Conflict("Invalid format for Email");
                 
                 //Crypting the password
