@@ -24,9 +24,7 @@ public class UserController : ControllerBase
      * Parameters: string movieId
      * Returns: double
      */
-    [HttpGet]
-    [Route("rating")]
-    public async Task<double> GetMovieRating(string movieId)
+    private async Task<ActionResult<double>> GetMovieRating(string movieId)
     {
         double rating = 0;
         var client = new HttpClient();
@@ -48,6 +46,7 @@ public class UserController : ControllerBase
             var document = JsonDocument.Parse(body);
             var root = document.RootElement;
             var results = root.GetProperty("results");
+
             if (results.ValueKind != JsonValueKind.Null)
             {
                 var ratingElement = results.GetProperty("averageRating");
@@ -57,7 +56,7 @@ public class UserController : ControllerBase
             }
         }
 
-        return rating;
+        return Ok(rating);
     }
 
     /*
@@ -68,7 +67,7 @@ public class UserController : ControllerBase
      * Throws: Exception if the API call fails
     */
     [HttpGet]
-    public async Task<List<MovieDto>> GetDataFromApi(string title, int userId)
+    public async Task<ActionResult<List<MovieDto>>> GetDataFromApi(string title, int userId)
     {
         //Request to the API
         var client = new HttpClient();
@@ -81,7 +80,6 @@ public class UserController : ControllerBase
         content.Add(new StringContent("false"), "exact");
         content.Add(new StringContent("movie,tvSeries"), "titleType");
         request.Content = content;
-
 
         var movieDtos = new List<MovieDto>();
         using (var response = await client.SendAsync(request))
@@ -105,10 +103,10 @@ public class UserController : ControllerBase
                     ? "https://gomagcdn.ro/domains/dorianpopa.ro/files/product/medium/tricou-hatz-college-48-1205.jpg"
                     : imageElement.GetProperty("url").ToString();
                 var releaseYear = element.GetProperty("releaseYear").GetProperty("year").GetInt32();
-                
-                rating = await GetMovieRating(idString);
-                Console.WriteLine(rating);
 
+                var result = await GetMovieRating(idString);
+                rating = result.Value;
+                
                 movieDtos.Add(new MovieDto
                 {
                     Id = idString,
@@ -119,9 +117,20 @@ public class UserController : ControllerBase
                 });
             }
 
-            //TODO: Add search to database 
-            
-            return movieDtos;
+
+            var searchLog = new SearchLog
+            {
+                IdUser = userId,
+                Date = DateTime.Now,
+                Action = "search",
+                ActionDetail = title
+            };
+
+            _context.SearchLogs.Add(searchLog);
+            await _context.SaveChangesAsync();
+
+
+            return Ok(movieDtos);
         }
     }
 }
