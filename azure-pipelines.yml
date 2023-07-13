@@ -9,6 +9,10 @@ trigger:
 pool:
   vmImage: ubuntu-latest
 
+steps:
+- script: echo Build has started!
+  displayName: 'Start building Solution'
+
 - task: Build Server Project
   inputs:
     command: 'build'
