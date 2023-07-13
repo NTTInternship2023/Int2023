@@ -13,11 +13,11 @@ steps:
 - script: echo Build has started!
   displayName: 'Start building Solution'
 
-- task: Build Server Project
+- task: BuildServerProject@1
   inputs:
     command: 'build'
     projects: 'SearchTheWebServer/*.csproj'
 
-- task: Build Web App
+- task: BuildWebApp@2
   inputs:
     script: 'dotnet build SearchTheWeb'
