@@ -9,15 +9,11 @@ trigger:
 pool:
   vmImage: ubuntu-latest
 
-steps:
-- script: dotnet build  /SearchTheWeb/*.csproj
-  displayName: 'dotnet build SearchTheWeb csproj'
-
-
-- task: DotNetCoreCLI@2
+- task: Build Server Project
   inputs:
     command: 'build'
-    projects: '/SearchTheWebServer/*.csproj'
-  
+    projects: 'SearchTheWebServer/*.csproj'
 
-
+- task: Build Web App
+  inputs:
+    script: 'dotnet build SearchTheWeb'
