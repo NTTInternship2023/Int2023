@@ -1,27 +1,38 @@
 ﻿[
   {
-    "date": "2018-05-06",
-    "temperatureC": 1,
-    "summary": "Freezing"
+    "Date": "2018-05-06",
+    "Name": "Pisici",
+    "Summary": "matze",
+    "PhotoUrl": "https://gomagcdn.ro/domains/petmax.ro/files/files/mikhail-vasilyev-ifxjddqk-0u-unsplash-331835.jpg"
   },
   {
-    "date": "2018-05-07",
-    "temperatureC": 14,
-    "summary": "Bracing"
+    "Date": "2018-05-07",
+    "Name": "Mancare",
+    "Summary": "Foame",
+    "PhotoUrl": "https://www.lauralaurentiu.ro/wp-content/uploads/2021/08/gulas-rapid-reteta-laura-laurentiu-mancare-de-cartofi.jpg"
   },
   {
-    "date": "2018-05-08",
-    "temperatureC": -13,
-    "summary": "Freezing"
+    "Date": "2018-05-08",
+    "Name": "Pesti",
+    "Summary": "Apa",
+    "PhotoUrl": "https://i1.wp.com/www.pescarinformat.ro/wp-content/uploads/2016/05/pestii-miros.jpg?fit=1000%2C800&ssl=1"
   },
   {
-    "date": "2018-05-09",
-    "temperatureC": -16,
-    "summary": "Balmy"
+    "Date": "2018-05-09",
+    "Name": "Oameni",
+    "Summary": "aghahjwq",
+    "PhotoUrl": "https://image.stirileprotv.ro/media/images/800x450/Oct2015/61732434.jpg"
+  },
+{
+    "Date": "2018-08-11",
+    "Name": "Macaroane",
+    "Summary": "cu branza",
+    "PhotoUrl": "https://pofta-buna.com/wp-content/uploads/2016/01/Macaroane-cu-branza-pofta-buna-cu-gina-bradea-4-700x467.jpg"
   },
   {
-    "date": "2018-05-10",
-    "temperatureC": -2,
-    "summary": "Chilly"
+    "Date": "2018-05-10",
+    "Name": "Da",
+    "Summary": "Chilly",
+    "PhotoUrl": "https://yt3.googleusercontent.com/ytc/AGIKgqNn9Ca1wnHAqELv5sZCajyuOrFceJbgEIEEv87-=s900-c-k-c0x00ffffff-no-rj"
   }
 ]

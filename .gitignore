@@ -1,4 +1,7 @@
 /SearchTheWeb/obj/*
 /SearchTheWeb/bin/*
+/SearchTheWeb/.idea/*
+/SearchTheWeb/.vs/*
 /SearchTheWebServer/obj/*
 /SearchTheWebServer/bin/*
+/.vscode/*
