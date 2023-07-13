@@ -1,0 +1,61 @@
+@page "/login"
+@layout LoginLayout
+@inject IJSRuntime JsRuntime
+
+<div class="container">
+    <h1>LOGIN</h1>
+    <div class="box">
+        <div class="inside_box">
+            <p>
+                <MatTextField @bind-Value="@Username" Label="Username/Email" Outlined="true"></MatTextField>
+            </p>
+            <p>
+                <MatTextField @bind-Value="@Password" Label="Password" Outlined="true" Type="password"></MatTextField>
+            </p>
+            <div class="button">
+                <MatButton Outlined="true" Style="align-self: flex-start; color: black" OnClick="@openPopup">Register</MatButton>
+                <MatButton Raised="true" Style="align-self: flex-end;">Sign In</MatButton>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="popup" class="popup">
+    <div class="popup-content r_box">
+        <h1>REGISTER</h1>
+        <div>
+            <p>
+                <MatTextField @bind-Value="@NewEmail" Label="Email" Outlined="true" style="width: 300px;"></MatTextField>
+            </p>
+            <p>
+                <MatTextField @bind-Value="@NewUsername" Label="Username" Outlined="true" style="width: 300px;"></MatTextField>
+            </p>
+            <p>
+                <MatTextField @bind-Value="@NewPassword" Label="Password" Outlined="true" Type="password"></MatTextField>
+            </p>
+            <p>
+                <MatTextField @bind-Value="@ConfirmNewPassword" Label="Confirm Password" Outlined="true" Type="password"></MatTextField>
+            </p>
+        </div>
+        <MatButton Outlined="true" Style="align-self: flex-start; color: black" OnClick="@closePopup">Cancel</MatButton>
+        <MatButton Raised="true" Style="align-self: flex-start;">Sign Up</MatButton>
+    </div>
+</div>
+
+@code
+{
+    string? Username;
+    string? NewUsername;
+    string? NewEmail;
+    string? Password;
+    string? NewPassword;
+    string? ConfirmNewPassword;
+    void openPopup()
+    {
+        JsRuntime.InvokeVoidAsync("openPopup");
+    }
+    void closePopup()
+    {
+        JsRuntime.InvokeVoidAsync("closePopup");
+    }
+}
