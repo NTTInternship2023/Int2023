@@ -20,28 +20,30 @@
     </div>
 </div>
 
-<div id="popup" class="popup">
-    <div class="popup-content r_box">
-        <h1>REGISTER</h1>
-        <div>
-            <p>
-                <MatTextField @bind-Value="@NewEmail" Label="Email" Outlined="true" style="width: 300px;"></MatTextField>
-            </p>
-            <p>
-                <MatTextField @bind-Value="@NewUsername" Label="Username" Outlined="true" style="width: 300px;"></MatTextField>
-            </p>
-            <p>
-                <MatTextField @bind-Value="@NewPassword" Label="Password" Outlined="true" Type="password"></MatTextField>
-            </p>
-            <p>
-                <MatTextField @bind-Value="@ConfirmNewPassword" Label="Confirm Password" Outlined="true" Type="password"></MatTextField>
-            </p>
+@if (PopupActive)
+{
+    <div class="popup" style="display: flex">
+        <div class="popup-content r_box">
+            <h1>REGISTER</h1>
+            <div>
+                <p>
+                    <MatTextField @bind-Value="@NewEmail" Label="Email" Outlined="true" style="width: 300px;"></MatTextField>
+                </p>
+                <p>
+                    <MatTextField @bind-Value="@NewUsername" Label="Username" Outlined="true" style="width: 300px;"></MatTextField>
+                </p>
+                <p>
+                    <MatTextField @bind-Value="@NewPassword" Label="Password" Outlined="true" Type="password"></MatTextField>
+                </p>
+                <p>
+                    <MatTextField @bind-Value="@ConfirmNewPassword" Label="Confirm Password" Outlined="true" Type="password"></MatTextField>
+                </p>
+            </div>
+            <MatButton Outlined="true" Style="align-self: flex-start; color: black" OnClick="@closePopup">Cancel</MatButton>
+            <MatButton Raised="true" Style="align-self: flex-start;">Sign Up</MatButton>
         </div>
-        <MatButton Outlined="true" Style="align-self: flex-start; color: black" OnClick="@closePopup">Cancel</MatButton>
-        <MatButton Raised="true" Style="align-self: flex-start;">Sign Up</MatButton>
     </div>
-</div>
-
+}
 @code
 {
     string? Username;
@@ -50,12 +52,14 @@
     string? Password;
     string? NewPassword;
     string? ConfirmNewPassword;
+    bool PopupActive = false;
     void openPopup()
     {
-        JsRuntime.InvokeVoidAsync("openPopup");
+        Console.WriteLine(PopupActive);
     }
     void closePopup()
     {
-        JsRuntime.InvokeVoidAsync("closePopup");
+        PopupActive = false;
     }
 }
+
