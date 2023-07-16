@@ -1,0 +1,84 @@
+@page "/weeklysearchgraph"
+@using ChartJs.Blazor.PieChart
+
+
+<Chart Config="_pieConfig"></Chart>
+
+@code {
+
+    //Get Last Week dates
+    DateTime LastWeekStartDate { get; set; }
+    DateTime LastWeekEndDate { get; set; }
+
+
+    private PieConfig _pieConfig = new();
+
+    public class SearchData
+    {
+        public string SearchTerm { get; set; } = string.Empty;
+        public int SearchCount { get; set; }
+    }
+
+    private readonly SearchData[] _searchDatas =
+    {
+        new() { SearchTerm = "C#", SearchCount = 200 },
+        new() { SearchTerm = "Java", SearchCount = 150 },
+        new() { SearchTerm = "Python", SearchCount = 50 },
+        new() { SearchTerm = "C++", SearchCount = 25 },
+        new() { SearchTerm = "F#", SearchCount = 5 },
+        new() { SearchTerm = "COBOL", SearchCount = 25 },
+        new() { SearchTerm = "JavaScript", SearchCount = 100 }
+    };
+
+
+    protected override void OnInitialized()
+    {
+        CalculateLastWeekDates();
+        ConfigurePieConfig();
+    }
+
+    private void ConfigurePieConfig()
+    {
+        _pieConfig = new PieConfig();
+
+        _pieConfig.Options = new PieOptions
+        {
+            Responsive = true,
+            Title = new OptionsTitle
+            {
+                Display = true,
+                Text = $"Last Week Search Terms ({LastWeekStartDate.ToShortDateString()} - {LastWeekEndDate.ToShortDateString()})"
+            }
+        };
+        var dataset = new PieDataset<int>();
+        foreach (var item in _searchDatas)
+        {
+            _pieConfig.Data.Labels.Add(item.SearchTerm);
+            dataset.Add(item.SearchCount);
+        }
+        dataset.BackgroundColor = new[]
+        {
+            "#FF6384", // Red
+            "#36A2EB", // Blue
+            "#FFCE56", // Yellow
+            "#4BC0C0", // Green
+            "#9966FF", // Purple
+            "#FF9F40", // Orange
+            "#C9CBCF" // Gray
+        };
+        _pieConfig.Data.Datasets.Add(dataset);
+    }
+
+    private void CalculateLastWeekDates()
+    {
+        var currentDate = DateTime.Now;
+
+        var firstDayOfWeek = currentDate.AddDays(-(int)currentDate.DayOfWeek + 1);
+        var lastDayOfWeek = firstDayOfWeek.AddDays(6);
+
+        LastWeekStartDate = firstDayOfWeek.AddDays(-7);
+
+        LastWeekEndDate = lastDayOfWeek.AddDays(-7);
+    }
+
+}
