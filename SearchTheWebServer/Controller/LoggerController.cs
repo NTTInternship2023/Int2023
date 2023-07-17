@@ -38,6 +38,7 @@ namespace SearchTheWebServer.Controller
 
         [HttpPost]
         [Route("Suggestions")]
+        [DisableCors] 
         public async Task<ActionResult<List<SearchLog>>> GetSearchSuggestions([FromBody]string hint){
             Console.WriteLine(hint);
             var searchSuggestions = (await _db.SearchLogs.Where(w=>w.ActionDetail.StartsWith(hint)).ToListAsync()).ToList();

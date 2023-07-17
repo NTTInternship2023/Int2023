@@ -1,6 +1,10 @@
 @page "/search"
 @inject HttpClient Http
 @inject NavigationManager NavigationManager
+@using System.Text
+@using System.Net.Http
+@using System.Text.Json
+@using Microsoft.Extensions.Http
 
 <PageTitle>Search Hashtag</PageTitle>
 
@@ -30,13 +34,20 @@
 
 <form class="search-form">
     <div class="search-bar">
-        <input type="text" class="form-control search-input" id="searchInput" @bind="@searchTerm" placeholder="Enter your search term" />
+        <input type="text" class="form-control search-input" id="searchInput" @bind="@searchTerm" placeholder="Enter your search term" @oninput="GetSearchSuggestions"/>
         <datalist id="nameSuggestions">
-            @foreach (var suggestion in GetSearchSuggestions())
+            @foreach (var suggestion in lista)
             {
                 <option value="@suggestion" />
             }
         </datalist>
+        <br> -Start Year-
+        <input type="text" class="form-control search-input" id="searchInput" @bind="@StartYear" placeholder="Start Year" />
+         -End Year-
+        <input type="text" class="form-control search-input" id="searchInput" @bind="@EndYear" placeholder="End Year" />
+        <input type="text" class="form-control search-input" id="searchInput" @bind="@Sort" placeholder="Sorting incr/decr" />
+        <input type="text" class="form-control search-input" id="searchInput" @bind="@TitleType" placeholder="Title type movie/tv series" />
+        
     </div>
     <button type="button" class="btn btn-primary search-button" @onclick="PerformSearch">Search</button>
 </form>
@@ -72,7 +83,12 @@
 @code {
     private SearchTerm[] allHashtags;
     private SearchTerm[] hashtags;
+    private List<string> lista=new List<string>();
     private string searchTerm;
+    private int StartYear;
+    private string Sort;
+    private string TitleType;
+    private int EndYear;
     private string currentUser = "John";
     private bool showUserPopup = false;
 
@@ -81,12 +97,33 @@
         // Initialize data
         allHashtags = await Http.GetFromJsonAsync<SearchTerm[]>("/sample-data/weather.json");
         hashtags = allHashtags;
+         lista = new List<string>();
     }
 
-    private IEnumerable<string> GetSearchSuggestions()
+    private async Task GetSearchSuggestions()
+{ 
+    try
     {
-        return allHashtags.Select(h => h.Name).Distinct();
+        var httpClient = new HttpClient();
+
+        var jsonContent = new
+        {
+            hint = searchTerm
+        };
+
+        string jsonString = JsonSerializer.Serialize(jsonContent);
+        HttpContent content = new StringContent(searchTerm);
+        var response = await httpClient.PostAsync("https://localho.st:7194/Logger/Suggestion", content);
+
+        var responseContent = await response.Content.ReadAsStringAsync();
+        lista = JsonSerializer.Deserialize<List<string>>(responseContent);
     }
+    catch (Exception ex)
+    {
+        // Afiseaza detaliile exceptiei in consola pentru debug
+        Console.WriteLine(ex.ToString());
+    }
+}
 
     private void PerformSearch()
     {

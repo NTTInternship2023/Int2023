@@ -21,7 +21,10 @@ builder.Services.AddCors(options =>
     {
         builder.WithOrigins("https://localho.st:7154")
                .AllowAnyHeader()
-               .AllowAnyMethod();
+               .AllowAnyMethod()
+               .WithExposedHeaders("Content-Disposition")
+               .SetPreflightMaxAge(TimeSpan.FromMinutes(10));
+
     });
 });
 
