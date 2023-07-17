@@ -37,8 +37,7 @@ namespace SearchTheWebServer.Controller
         [HttpGet]
         [Route("GetAll")]
         [DisableCors]
-        public async Task<ActionResult<List<SearchLog>>> GetAll()
-        {
+        public async Task<ActionResult<List<SearchLog>>> GetAll(){
             return (await _db.SearchLogs.ToListAsync()).ToList();
         }
 
