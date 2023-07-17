@@ -15,15 +15,15 @@ namespace SearchTheWebServer.Controller
     [ApiController]
     public class UserController : ControllerBase
     {
-        private string ApiKey { get; } = "70158d7bdcmsh70b948f4980dad3p1269b9jsn557b43f311ed";
+        private string ApiKey { get; } = "c3eb1fafacmshc5fd818a156e962p1af460jsnc0f24ca50442";
         private string ApiHost { get; } = "moviesdatabase.p.rapidapi.com";
-        
+
         private readonly AppDbContext _context;
-       public UserController(AppDbContext context)
-        { 
+        public UserController(AppDbContext context)
+        {
             _context = context;
         }
-                
+
         [HttpPost("register")]
         public async Task<ActionResult<User>> Register(RegisterUserDto userDto)
         {
@@ -39,7 +39,7 @@ namespace SearchTheWebServer.Controller
 
                 if (!PasswordValidator.PasswordPatternValidation(userDto.Password)) return Conflict("Invalid format for Password");
                 if (!EmailValidator.EmailPatternValidation(userDto.Email)) return Conflict("Invalid format for Email");
-                
+
                 //Crypting the password
                 CreatePasswordHash(userDto.Password, out byte[] passwordHash, out byte[] passwordSalt);
 
@@ -47,7 +47,7 @@ namespace SearchTheWebServer.Controller
                 user.PasswordHash = passwordHash;
                 user.PasswordSalt = passwordSalt;
                 //Creating the entity for the db
-                User newUser = new User { Username = userDto.Username, Email= userDto.Email, PasswordHash = user.PasswordHash, PasswordSalt = user.PasswordSalt };
+                User newUser = new User { Username = userDto.Username, Email = userDto.Email, PasswordHash = user.PasswordHash, PasswordSalt = user.PasswordSalt };
 
                 //Adding and saving the entity for the db
                 _context.Users.Add(newUser);
@@ -64,22 +64,24 @@ namespace SearchTheWebServer.Controller
         [HttpPost("login")]
         public async Task<ActionResult<string>> Login(LoginUserDto userDto)
         {
-            try {
+            try
+            {
                 var existingUser = await _context.Users.FirstOrDefaultAsync(u => u.Username == userDto.Username);
-               
-                if (existingUser == null )
+
+                if (existingUser == null)
                 {
                     return ("Username unregister, please register");
                 }
-               
+
                 else if (!VerifyPasswordHash(userDto.Password, existingUser.PasswordHash, existingUser.PasswordSalt))
                 {
                     return ("Wrong password");
                 }
-               
+
                 return ("Succesful Login");
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 return StatusCode(500, $"Error logging in: {ex.Message}");
             }
         }
@@ -99,21 +101,22 @@ namespace SearchTheWebServer.Controller
                     return Conflict("Wrong password");
                 }
                 if (!PasswordValidator.PasswordPatternValidation(userDto.NewPassword)) return Conflict("Invalid format for Password");
-                
+
                 CreatePasswordHash(userDto.NewPassword, out byte[] passwordHash, out byte[] passwordSalt);
                 updatedUser.PasswordHash = passwordHash;
                 updatedUser.PasswordSalt = passwordSalt;
                 await _context.SaveChangesAsync();
                 return Ok(updatedUser);
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 return StatusCode(500, $"Error changing password in: {ex.Message}");
             }
         }
 
-        private void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt) 
+        private void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
         {
-            using( var hmac = new HMACSHA512())
+            using (var hmac = new HMACSHA512())
             {
                 passwordSalt = hmac.Key;
                 passwordHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
@@ -122,128 +125,232 @@ namespace SearchTheWebServer.Controller
 
         private bool VerifyPasswordHash(string password, byte[] passwordHash, byte[] passwordSalt)
         {
-            using( var hmac= new HMACSHA512(passwordSalt))
+            using (var hmac = new HMACSHA512(passwordSalt))
             {
-                var computedHash=hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes((string)password));
-               return computedHash.SequenceEqual(passwordHash);
+                var computedHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes((string)password));
+                return computedHash.SequenceEqual(passwordHash);
             }
         }
-        
-        
-    /*
-     * Function to get movie's rating from the API. It makes a GET request to the API and returns the rating.
-     * Parameters: string movieId
-     * Returns: double
-     */
-    private async Task<ActionResult<double>> GetMovieRating(string movieId)
-    {
-        double rating = 0;
-        var client = new HttpClient();
-        var request = new HttpRequestMessage
+
+
+        /*
+         * Function to get movie's rating from the API. It makes a GET request to the API and returns the rating.
+         * Parameters: string movieId
+         * Returns: double
+         */
+        private async Task<ActionResult<double>> GetMovieRating(string movieId)
         {
-            Method = HttpMethod.Get,
-            RequestUri = new Uri($"https://moviesdatabase.p.rapidapi.com/titles/{movieId}/ratings"),
-            Headers =
+            double rating = 0;
+            var client = new HttpClient();
+            var request = new HttpRequestMessage
+            {
+                Method = HttpMethod.Get,
+                RequestUri = new Uri($"https://moviesdatabase.p.rapidapi.com/titles/{movieId}/ratings"),
+                Headers =
             {
                 { "X-RapidAPI-Key", "70158d7bdcmsh70b948f4980dad3p1269b9jsn557b43f311ed" },
                 { "X-RapidAPI-Host", "moviesdatabase.p.rapidapi.com" }
             }
-        };
-
-        using (var response = await client.SendAsync(request))
-        {
-            response.EnsureSuccessStatusCode();
-            var body = await response.Content.ReadAsStringAsync();
-            var document = JsonDocument.Parse(body);
-            var root = document.RootElement;
-            var results = root.GetProperty("results");
-
-            if (results.ValueKind != JsonValueKind.Null)
-            {
-                var ratingElement = results.GetProperty("averageRating");
-                rating = ratingElement.ValueKind != JsonValueKind.Null
-                    ? results.GetProperty("averageRating").GetDouble()
-                    : 0;
-            }
-        }
-
-        return Ok(rating);
-    }
-
-    /*
-    * Function to get data from the API. It makes a GET request to the API and returns DTOs.
-     * Adds the search to the database.
-     * Parameters: string title, int userId
-     * Returns: Dto
-     * Throws: Exception if the API call fails
-    */
-    [HttpGet]
-    public async Task<ActionResult<List<MovieDto>>> GetDataFromApi(string title, int userId)
-    {
-        //Request to the API
-        var client = new HttpClient();
-        var request = new HttpRequestMessage(HttpMethod.Get,
-            $"https://moviesdatabase.p.rapidapi.com/titles/search/title/{title}");
-        request.Headers.Add("X-RapidAPI-Host", ApiHost);
-        request.Headers.Add("X-RapidAPI-Key", ApiKey);
-
-        var content = new MultipartFormDataContent();
-        content.Add(new StringContent("false"), "exact");
-        content.Add(new StringContent("movie,tvSeries"), "titleType");
-        request.Content = content;
-
-        var movieDtos = new List<MovieDto>();
-        using (var response = await client.SendAsync(request))
-        {
-            response.EnsureSuccessStatusCode();
-            var body = await response.Content.ReadAsStringAsync();
-
-            var document = JsonDocument.Parse(body);
-            var root = document.RootElement;
-            var results = root.GetProperty("results");
-            var resultList = results.EnumerateArray().ToList();
-
-            foreach (var element in resultList)
-            {
-                var titleString = element.GetProperty("titleText").GetProperty("text").ToString();
-                var imageElement = element.GetProperty("primaryImage");
-                var idString = element.GetProperty("id").ToString();
-                double rating;
-
-                var imageString = imageElement.ValueKind == JsonValueKind.Null
-                    ? "https://gomagcdn.ro/domains/dorianpopa.ro/files/product/medium/tricou-hatz-college-48-1205.jpg"
-                    : imageElement.GetProperty("url").ToString();
-                var releaseYear = element.GetProperty("releaseYear").GetProperty("year").GetInt32();
-
-                var result = await GetMovieRating(idString);
-                rating = result.Value;
-                
-                movieDtos.Add(new MovieDto
-                {
-                    Id = idString,
-                    Title = titleString,
-                    ImageUrl = imageString,
-                    ReleaseYear = releaseYear,
-                    Rating = rating
-                });
-            }
-
-
-            var searchLog = new SearchLog
-            {
-                IdUser = userId,
-                Date = DateTime.Now,
-                Action = "search",
-                ActionDetail = title
             };
 
-            _context.SearchLogs.Add(searchLog);
-            await _context.SaveChangesAsync();
+            using (var response = await client.SendAsync(request))
+            {
+                response.EnsureSuccessStatusCode();
+                var body = await response.Content.ReadAsStringAsync();
+                var document = JsonDocument.Parse(body);
+                var root = document.RootElement;
+                var results = root.GetProperty("results");
 
+                if (results.ValueKind != JsonValueKind.Null)
+                {
+                    var ratingElement = results.GetProperty("averageRating");
+                    rating = ratingElement.ValueKind != JsonValueKind.Null
+                        ? results.GetProperty("averageRating").GetDouble()
+                        : 0;
+                }
+            }
 
-            return Ok(movieDtos);
+            return Ok(rating);
         }
-    }
+
+        /*
+        * Function to get data from the API. It makes a GET request to the API and returns DTOs.
+         * Adds the search to the database.
+         * Parameters: string title, int userId
+         * Returns: Dto
+         * Throws: Exception if the API call fails
+        */
+        [HttpGet]
+        public async Task<ActionResult<List<MovieDto>>> GetDataFromApi(string title, int userId)
+        {
+            //Request to the API
+            var client = new HttpClient();
+            var request = new HttpRequestMessage(HttpMethod.Get,
+                $"https://moviesdatabase.p.rapidapi.com/titles/search/title/{title}");
+            request.Headers.Add("X-RapidAPI-Host", ApiHost);
+            request.Headers.Add("X-RapidAPI-Key", ApiKey);
+
+            var content = new MultipartFormDataContent();
+            content.Add(new StringContent("false"), "exact");
+            content.Add(new StringContent("movie,tvSeries"), "titleType");
+            request.Content = content;
+
+            var movieDtos = new List<MovieDto>();
+            using (var response = await client.SendAsync(request))
+            {
+                response.EnsureSuccessStatusCode();
+                var body = await response.Content.ReadAsStringAsync();
+
+                var document = JsonDocument.Parse(body);
+                var root = document.RootElement;
+                var results = root.GetProperty("results");
+                var resultList = results.EnumerateArray().ToList();
+
+                foreach (var element in resultList)
+                {
+                    var titleString = element.GetProperty("titleText").GetProperty("text").ToString();
+                    var imageElement = element.GetProperty("primaryImage");
+                    var idString = element.GetProperty("id").ToString();
+                    double rating;
+
+                    var imageString = imageElement.ValueKind == JsonValueKind.Null
+                        ? "https://gomagcdn.ro/domains/dorianpopa.ro/files/product/medium/tricou-hatz-college-48-1205.jpg"
+                        : imageElement.GetProperty("url").ToString();
+                    var releaseYear = element.GetProperty("releaseYear").GetProperty("year").GetInt32();
+
+                    var result = await GetMovieRating(idString);
+                    rating = result.Value;
+
+                    movieDtos.Add(new MovieDto
+                    {
+                        Id = idString,
+                        Title = titleString,
+                        ImageUrl = imageString,
+                        ReleaseYear = releaseYear,
+                        Rating = rating
+                    });
+                }
+
+
+                var searchLog = new SearchLog
+                {
+                    IdUser = userId,
+                    Date = DateTime.Now,
+                    Action = "search",
+                    ActionDetail = title
+                };
+
+                _context.SearchLogs.Add(searchLog);
+                await _context.SaveChangesAsync();
+
+
+                return Ok(movieDtos);
+            }
+        }
+        [HttpGet("Filter")]
+        public async Task<ActionResult<List<MovieDto>>> FilterMovies(string title, int? startYear, string? sort, string? titleType, int? endYear, int userId)
+        {
+            
+            //Request to the API
+            var client = new HttpClient();
+            var request = new HttpRequestMessage(HttpMethod.Get,
+                $"https://moviesdatabase.p.rapidapi.com/titles/search/title/{title}");
+            request.Headers.Add("X-RapidAPI-Host", ApiHost);
+            request.Headers.Add("X-RapidAPI-Key", ApiKey);
+
+            var content = new MultipartFormDataContent();
+            content.Add(new StringContent("false"), "exact");
+            content.Add(new StringContent("movie,tvSeries"), "titleType");
+
+            //Validating input
+            FilterParametersValidator validator = new FilterParametersValidator();
+            if (!validator.IsValidSort(sort))
+            {
+                return Conflict("Sort parameter is Invalid, only incr or decr available");
+            }
+            if (!(validator.IsValidYear(endYear) && validator.IsValidYear(startYear)))
+            {
+                return Conflict("Invalid time parameters");
+            }
+            if (!(validator.IsValidTimeInterval(startYear, endYear)))
+            {
+                return Conflict("Invalid time interval");
+            }
+
+            request.Content = content;
+
+            var movieDtos = new List<MovieDto>();
+            using (var response = await client.SendAsync(request))
+            {
+                response.EnsureSuccessStatusCode();
+                var body = await response.Content.ReadAsStringAsync();
+
+                var document = JsonDocument.Parse(body);
+                var root = document.RootElement;
+                var results = root.GetProperty("results");
+                var resultList = results.EnumerateArray().ToList();
+
+                if(resultList.Count == 0) {
+                    return Conflict("No results found");
+                }
+                foreach (var element in resultList)
+                {
+                    var titleString = element.GetProperty("titleText").GetProperty("text").ToString();
+                    var imageElement = element.GetProperty("primaryImage");
+                    var idString = element.GetProperty("id").ToString();
+                    double rating;
+
+                    var imageString = imageElement.ValueKind == JsonValueKind.Null
+                        ? "https://gomagcdn.ro/domains/dorianpopa.ro/files/product/medium/tricou-hatz-college-48-1205.jpg"
+                        : imageElement.GetProperty("url").ToString();
+                    var releaseYear = element.GetProperty("releaseYear").GetProperty("year").GetInt32();
+
+                    var result = await GetMovieRating(idString);
+                    rating = result.Value;
+
+                    movieDtos.Add(new MovieDto
+                    {
+                        Id = idString,
+                        Title = titleString,
+                        ImageUrl = imageString,
+                        ReleaseYear = releaseYear,
+                        Rating = rating
+                    });
+                }
+
+                if (startYear != null && endYear == null)
+                {
+                   movieDtos= movieDtos.FindAll(m => m.ReleaseYear >= startYear);
+                }
+                else if (startYear == null && endYear != null)
+                {
+                    movieDtos = movieDtos.FindAll(m => m.ReleaseYear <= endYear );
+                }
+                else if( startYear != null && endYear != null )
+                {
+                    movieDtos = movieDtos.FindAll(m => (m.ReleaseYear <= endYear  && m.ReleaseYear >= startYear));
+                }
+          
+                var searchLog = new SearchLog
+                {
+                    IdUser = userId,
+                    Date = DateTime.Now,
+                    Action = "search",
+                    ActionDetail = title
+                };
+
+                _context.SearchLogs.Add(searchLog);
+                await _context.SaveChangesAsync();
+                if (sort != null && sort.Equals("incr"))
+                {
+                   return Ok(movieDtos.OrderBy(m => m.ReleaseYear));
+
+                }
+                else return Ok(movieDtos.OrderByDescending(m => m.ReleaseYear));
+             
+            }
+
+        }
     }
 }
 
