@@ -8,6 +8,7 @@ using SearchTheWebServer.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Cors;
 
 namespace SearchTheWebServer.Controller
 {
@@ -23,6 +24,7 @@ namespace SearchTheWebServer.Controller
 
         [HttpGet]
         [Route("GetAll")]
+        [DisableCors] 
         public async Task<ActionResult<List<SearchLog>>> GetAll(){
             return (await _db.SearchLogs.ToListAsync()).ToList();
         }
