@@ -1,6 +1,9 @@
 @page "/login"
 @layout LoginLayout
 @inject IJSRuntime JsRuntime
+@inject NavigationManager NavigationManager
+
+
 
 <div class="container">
     <h1>LOGIN</h1>
@@ -14,7 +17,7 @@
             </p>
             <div class="button">
                 <MatButton Outlined="true" Style="align-self: flex-start; color: black" OnClick="@openPopup">Register</MatButton>
-                <MatButton Raised="true" Style="align-self: flex-end;">Sign In</MatButton>
+                <MatButton Raised="true" Style="align-self: flex-end;" OnClick="@NavigateToMain">Sign In</MatButton>
             </div>
         </div>
     </div>
@@ -55,11 +58,16 @@
     bool PopupActive = false;
     void openPopup()
     {
-        Console.WriteLine(PopupActive);
+        PopupActive = true;
     }
     void closePopup()
     {
         PopupActive = false;
+    }
+    private void NavigateToMain()
+    {
+        //to implement validation
+        NavigationManager.NavigateTo("/search");
     }
 }
 
