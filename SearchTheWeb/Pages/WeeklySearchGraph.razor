@@ -1,8 +1,8 @@
 @page "/weeklysearchgraph"
-@using ChartJs.Blazor.PieChart
+@using ChartJs.Blazor.BarChart
 
 
-<Chart Config="_pieConfig"></Chart>
+<Chart Config="_barConfig"></Chart>
 
 @code {
 
@@ -11,7 +11,7 @@
     DateTime LastWeekEndDate { get; set; }
 
 
-    private PieConfig _pieConfig = new();
+    private BarConfig _barConfig = new();
 
     public class SearchData
     {
@@ -21,27 +21,30 @@
 
     private readonly SearchData[] _searchDatas =
     {
-        new() { SearchTerm = "C#", SearchCount = 200 },
+        new() { SearchTerm = "C#", SearchCount = 160 },
         new() { SearchTerm = "Java", SearchCount = 150 },
+        new() { SearchTerm = "JavaScript", SearchCount = 100 },
         new() { SearchTerm = "Python", SearchCount = 50 },
         new() { SearchTerm = "C++", SearchCount = 25 },
-        new() { SearchTerm = "F#", SearchCount = 5 },
         new() { SearchTerm = "COBOL", SearchCount = 25 },
-        new() { SearchTerm = "JavaScript", SearchCount = 100 }
+        new() { SearchTerm = "F#", SearchCount = 20 },
+        new() { SearchTerm = "Go", SearchCount = 15 },
+        new() { SearchTerm = "Rust", SearchCount = 10 },
+        new() { SearchTerm = "TypeScript", SearchCount = 5 },
     };
 
 
     protected override void OnInitialized()
     {
         CalculateLastWeekDates();
-        ConfigurePieConfig();
+        ConfigureBarConfig();
     }
 
-    private void ConfigurePieConfig()
+    private void ConfigureBarConfig()
     {
-        _pieConfig = new PieConfig();
+        _barConfig = new BarConfig();
 
-        _pieConfig.Options = new PieOptions
+        _barConfig.Options = new BarOptions
         {
             Responsive = true,
             Title = new OptionsTitle
@@ -50,10 +53,17 @@
                 Text = $"Last Week Search Terms ({LastWeekStartDate.ToShortDateString()} - {LastWeekEndDate.ToShortDateString()})"
             }
         };
-        var dataset = new PieDataset<int>();
+
+        var dataset = new BarDataset<int>();
+        //Do not show legend
+        _barConfig.Options.Legend = new Legend
+        {
+            Display = false
+        };
         foreach (var item in _searchDatas)
         {
-            _pieConfig.Data.Labels.Add(item.SearchTerm);
+            
+            _barConfig.Data.Labels.Add(item.SearchTerm);
             dataset.Add(item.SearchCount);
         }
         dataset.BackgroundColor = new[]
@@ -64,10 +74,14 @@
             "#4BC0C0", // Green
             "#9966FF", // Purple
             "#FF9F40", // Orange
-            "#C9CBCF" // Gray
+            "#C9CBCF", // Gray
+            "#FF5733", // Coral
+            "#00FF00", // Lime Green
+            "#FF1493", // Deep Pink
         };
-        _pieConfig.Data.Datasets.Add(dataset);
+        _barConfig.Data.Datasets.Add(dataset);
     }
+
 
     private void CalculateLastWeekDates()
     {
