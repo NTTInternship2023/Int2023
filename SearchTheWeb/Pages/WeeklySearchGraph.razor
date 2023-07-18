@@ -1,70 +1,79 @@
 @page "/weeklysearchgraph"
 @using ChartJs.Blazor.BarChart
+@using ChartJs.Blazor.Common
 
+@inject HttpClient HttpClient
 
 <Chart Config="_barConfig"></Chart>
 
 @code {
 
     //Get Last Week dates
-    DateTime LastWeekStartDate { get; set; }
-    DateTime LastWeekEndDate { get; set; }
+    DateTime CurrentWeekStartDate { get; set; }
+    DateTime CurrentWeekEndDate { get; set; }
 
 
     private BarConfig _barConfig = new();
 
     public class SearchData
     {
-        public string SearchTerm { get; set; } = string.Empty;
-        public int SearchCount { get; set; }
+        public string keyword { get; set; } = string.Empty;
+        public int totalSearches { get; set; }
+        public int weekNumber { get; set; }
     }
 
-    private readonly SearchData[] _searchDatas =
-    {
-        new() { SearchTerm = "C#", SearchCount = 160 },
-        new() { SearchTerm = "Java", SearchCount = 150 },
-        new() { SearchTerm = "JavaScript", SearchCount = 100 },
-        new() { SearchTerm = "Python", SearchCount = 50 },
-        new() { SearchTerm = "C++", SearchCount = 25 },
-        new() { SearchTerm = "COBOL", SearchCount = 25 },
-        new() { SearchTerm = "F#", SearchCount = 20 },
-        new() { SearchTerm = "Go", SearchCount = 15 },
-        new() { SearchTerm = "Rust", SearchCount = 10 },
-        new() { SearchTerm = "TypeScript", SearchCount = 5 },
-    };
+    private List<SearchData> _searchDatas = new List<SearchData>();
 
-
-    protected override void OnInitialized()
+    private async Task GetData()
     {
-        CalculateLastWeekDates();
+        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7194/Logger/SearchAction?limit=10");
+        var response = await HttpClient.SendAsync(request);
+        if (response.IsSuccessStatusCode)
+        {
+            var responseContent = await response.Content.ReadAsStringAsync();
+            var searchDatas = System.Text.Json.JsonSerializer.Deserialize<List<SearchData>>(responseContent);
+            _searchDatas = searchDatas;
+        }
+        
+        //Get Last Week Data
+        var maxWeekNumber = _searchDatas.Max(x => x.weekNumber);
+        _searchDatas = _searchDatas.Where(x => x.weekNumber == maxWeekNumber).ToList();
+        
+        foreach (var data in _searchDatas)
+        {
+            Console.WriteLine($"{data.keyword}  {data.totalSearches}   {data.weekNumber}");
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetData();
+        CalculateCurrentWeekDates();
         ConfigureBarConfig();
     }
 
     private void ConfigureBarConfig()
     {
-        _barConfig = new BarConfig();
-
         _barConfig.Options = new BarOptions
         {
             Responsive = true,
             Title = new OptionsTitle
             {
                 Display = true,
-                Text = $"Last Week Search Terms ({LastWeekStartDate.ToShortDateString()} - {LastWeekEndDate.ToShortDateString()})"
+                Text = $"Last Week Search Terms ({CurrentWeekStartDate.ToShortDateString()} - {CurrentWeekEndDate.ToShortDateString()})"
             }
         };
 
         var dataset = new BarDataset<int>();
-        //Do not show legend
+        
         _barConfig.Options.Legend = new Legend
         {
             Display = false
         };
         foreach (var item in _searchDatas)
         {
-            
-            _barConfig.Data.Labels.Add(item.SearchTerm);
-            dataset.Add(item.SearchCount);
+            _barConfig.Data.Labels.Add(item.keyword);
+            dataset.Add(item.totalSearches);
         }
         dataset.BackgroundColor = new[]
         {
@@ -82,17 +91,17 @@
         _barConfig.Data.Datasets.Add(dataset);
     }
 
-
-    private void CalculateLastWeekDates()
+    //Function to get the current start and end dates of the week
+    //The week starts on Monday and ends on Sunday
+    private void CalculateCurrentWeekDates()
     {
+        
         var currentDate = DateTime.Now;
-
-        var firstDayOfWeek = currentDate.AddDays(-(int)currentDate.DayOfWeek + 1);
-        var lastDayOfWeek = firstDayOfWeek.AddDays(6);
-
-        LastWeekStartDate = firstDayOfWeek.AddDays(-7);
-
-        LastWeekEndDate = lastDayOfWeek.AddDays(-7);
+        var currentDayOfWeek = (int)currentDate.DayOfWeek;
+        var currentWeekStartDate = currentDate.AddDays(-currentDayOfWeek + 1);
+        var currentWeekEndDate = currentWeekStartDate.AddDays(6);
+        CurrentWeekStartDate = currentWeekStartDate;
+        CurrentWeekEndDate = currentWeekEndDate;
     }
 
 }
