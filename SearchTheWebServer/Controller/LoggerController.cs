@@ -9,6 +9,8 @@ using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Cors;
+using Microsoft.Extensions.Logging;
+using System.Globalization;
 
 namespace SearchTheWebServer.Controller
 {
@@ -17,37 +19,51 @@ namespace SearchTheWebServer.Controller
     public class LoggerController : ControllerBase
     {
         protected readonly AppDbContext _db;
-        
-        public LoggerController(AppDbContext db){
+        private readonly ILogger<LoggerController> _logger; // Add the logger
+        public class LogItem
+        {
+            public string Keyword { get; set; }
+            public int TotalSearches { get; set; }
+            public int WeekNumber { get; set; }
+        }
+
+
+        public LoggerController(AppDbContext db, ILogger<LoggerController> logger) // Modify the constructor
+        {
             _db = db;
+            _logger = logger;
         }
 
         [HttpGet]
         [Route("GetAll")]
-        [DisableCors] 
+        [DisableCors]
         public async Task<ActionResult<List<SearchLog>>> GetAll(){
             return (await _db.SearchLogs.ToListAsync()).ToList();
         }
 
         [HttpGet]
         [Route("GetLast")]
-        public async Task<SearchLog> GetLast(){
-           var LastLog = await _db.SearchLogs.OrderByDescending(x => x.Id).FirstAsync();
-           return LastLog;
+        public async Task<SearchLog> GetLast()
+        {
+            var LastLog = await _db.SearchLogs.OrderByDescending(x => x.Id).FirstAsync();
+            return LastLog;
         }
 
         [HttpPost]
         [Route("Suggestions")]
-        public async Task<ActionResult<List<SearchLog>>> GetSearchSuggestions([FromBody]string hint){
+        public async Task<ActionResult<List<SearchLog>>> GetSearchSuggestions([FromBody] string hint)
+        {
             Console.WriteLine(hint);
-            var searchSuggestions = (await _db.SearchLogs.Where(w=>w.ActionDetail.StartsWith(hint)).ToListAsync()).ToList();
+            var searchSuggestions = (await _db.SearchLogs.Where(w => w.ActionDetail.StartsWith(hint)).ToListAsync()).ToList();
             return searchSuggestions;
         }
 
         [HttpPost]
         [Route("LogAction")]
-        public async Task<ActionResult<SearchLog>> LogAction([FromBody]SearchLogDTO searchLogDTO){
-            try{
+        public async Task<ActionResult<SearchLog>> LogAction([FromBody] SearchLogDTO searchLogDTO)
+        {
+            try
+            {
                 SearchLog newSearchLog = new()
                 {
                     IdUser = searchLogDTO.IdUser,
@@ -58,9 +74,59 @@ namespace SearchTheWebServer.Controller
                 _db.SearchLogs.Add(newSearchLog);
                 await _db.SaveChangesAsync();
                 return Ok($"Search for {searchLogDTO.ActionDetail}");
-            }catch(Exception ex){
-                return StatusCode(500,$"Error save log: {ex.Message}");
             }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error save log: {ex.Message}");
+            }
+        }
+
+        // Add the new endpoint
+  [HttpGet]
+[Route("SearchAction")]
+public ActionResult<IEnumerable<LogItem>> GetLogItems(int? limit = null)
+{
+    try
+    {
+        var logItems = _db.SearchLogs
+            .AsEnumerable() // Perform client-side evaluation
+            .GroupBy(log => new { log.ActionDetail, WeekNumber = GetWeekNumber(log.Date) })
+            .Select(group => new LogItem
+            {
+                Keyword = group.Key.ActionDetail,
+                TotalSearches = group.Count(),
+                WeekNumber = group.Key.WeekNumber
+            })
+            .OrderByDescending(item => item.TotalSearches)
+            .ThenBy(item => item.Keyword)
+            .ToList();
+
+        if (limit.HasValue && limit.Value > 0)
+        {
+            if (limit.Value >= logItems.Count)
+            {
+                return Ok(logItems);
+            }
+            else
+            {
+                logItems = logItems.Take(limit.Value).ToList();
+            }
+        }
+
+        return Ok(logItems);
+    }
+    catch (Exception ex)
+    {
+        _logger.LogError(ex, "Error retrieving log items: {Message}", ex.Message);
+        return StatusCode(500, $"An error occurred while retrieving log items: {ex.Message}");
+    }
+}
+
+
+        private int GetWeekNumber(DateTime date)
+        {
+            CultureInfo ci = CultureInfo.CurrentCulture;
+            return ci.Calendar.GetWeekOfYear(date, CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday);
         }
     }
 }
