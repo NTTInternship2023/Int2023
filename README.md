@@ -1,6 +1,6 @@
 # Introduction 
 ## Internship 2023
-Aplicatie Back-end + Front-end ce interogheaza Instagram/TikTok si afiseaza rezultatele.
+Aplicatie Back-end + Front-end ce interogheaza 3rd party API si afiseaza rezultatele.
  
 # Getting Started
 ## Set up Dev Environment:

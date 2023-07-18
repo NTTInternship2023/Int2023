@@ -1,0 +1,80 @@
+.container::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #000;
+    background-image: url(https://images.pexels.com/photos/956999/milky-way-starry-sky-night-sky-star-956999.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1);
+    background-size: cover;
+    background-position: center;
+    filter: blur(8px);
+    backdrop-filter: blur(8px);
+    z-index: -1;
+  }
+  .container {
+    padding: 16px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    flex-direction: column;
+  }
+  .container h1 {
+    text-shadow: -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000;
+    color: white;
+    font-family: 'Roboto';
+  }
+  .box {
+    border: 3px solid #000000;
+    border-radius: 15px;
+    padding: 20px;
+    width: 300px;
+    height: 250px;
+    background-color: rgba(194, 194, 194, 0.3);
+    z-index: 1;
+  }
+  .r_box {
+    border: 3px solid #000000;
+    border-radius: 25px;
+    padding: 20px;
+    width: 400px;
+    height: 450px;
+    background-color: rgba(194, 194, 194, 0.3);
+    z-index: 1;
+  }
+  .inside_box {
+    opacity: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    z-index: 2;
+  }
+  .inside_box p {
+    margin: 10px 0;
+  }
+  .button {
+    color: black;
+  }
+  
+  .popup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 3;
+  }
+  .popup-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 5px;
+  }
