@@ -1,55 +1,84 @@
 @page "/weeklysearchgraph"
+@using System.Globalization
 @using ChartJs.Blazor.BarChart
 @using ChartJs.Blazor.Common
+@using System.Text.Json
 
 @inject HttpClient HttpClient
 
-<Chart Config="_barConfig"></Chart>
+@if (_isLoading)
+{
+    <p class="text-center">Loading...</p>
+}
+else
+{
+    @if (_searchDatas.Count > 0)
+    {
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-body">
+                        <Chart Config="_barConfig"></Chart>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-body">
+                        <p class="text-center">No data found</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+}
 
 @code {
 
-    //Get Last Week dates
+    //Get Current Week dates
     DateTime CurrentWeekStartDate { get; set; }
     DateTime CurrentWeekEndDate { get; set; }
+    static readonly CultureInfo _ci = CultureInfo.CurrentCulture;
+    readonly int _currentWeekNumber = _ci.Calendar.GetWeekOfYear(DateTime.Now, CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday);
+    
+    bool _isLoading = true;
+    private readonly BarConfig _barConfig = new();
 
-
-    private BarConfig _barConfig = new();
-
-    public class SearchData
+    private class SearchData
     {
         public string keyword { get; set; } = string.Empty;
         public int totalSearches { get; set; }
         public int weekNumber { get; set; }
     }
+    private List<SearchData> _searchDatas = new();
 
-    private List<SearchData> _searchDatas = new List<SearchData>();
+    protected override async Task OnInitializedAsync()
+    {
+        await GetData();
+        _isLoading = false;
+        CalculateCurrentWeekDates();
+        ConfigureBarConfig();
+    }
 
     private async Task GetData()
     {
+        //Get all data from Endpoint
         var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7194/Logger/SearchAction?limit=10");
         var response = await HttpClient.SendAsync(request);
         if (response.IsSuccessStatusCode)
         {
             var responseContent = await response.Content.ReadAsStringAsync();
-            var searchDatas = System.Text.Json.JsonSerializer.Deserialize<List<SearchData>>(responseContent);
-            _searchDatas = searchDatas;
+            var searchDatas = JsonSerializer.Deserialize<List<SearchData>>(responseContent);
+            _searchDatas = searchDatas!;
         }
-        
-        //Get Last Week Data
-        var maxWeekNumber = _searchDatas.Max(x => x.weekNumber);
-        _searchDatas = _searchDatas.Where(x => x.weekNumber == maxWeekNumber).ToList();
-        
-        foreach (var data in _searchDatas)
-        {
-            Console.WriteLine($"{data.keyword}  {data.totalSearches}   {data.weekNumber}");
-        }
-    }
 
-    protected override async Task OnInitializedAsync()
-    {
-        await GetData();
-        CalculateCurrentWeekDates();
-        ConfigureBarConfig();
+    //Get Current Week Data
+        _searchDatas = _searchDatas.Where(x => x.weekNumber == _currentWeekNumber).ToList();
     }
 
     private void ConfigureBarConfig()
@@ -60,12 +89,12 @@
             Title = new OptionsTitle
             {
                 Display = true,
-                Text = $"Last Week Search Terms ({CurrentWeekStartDate.ToShortDateString()} - {CurrentWeekEndDate.ToShortDateString()})"
+                Text = $"Current week's most searched movies ({CurrentWeekStartDate.ToShortDateString()} - {CurrentWeekEndDate.ToShortDateString()})"
             }
         };
 
         var dataset = new BarDataset<int>();
-        
+
         _barConfig.Options.Legend = new Legend
         {
             Display = false
@@ -86,7 +115,7 @@
             "#C9CBCF", // Gray
             "#FF5733", // Coral
             "#00FF00", // Lime Green
-            "#FF1493", // Deep Pink
+            "#FF1493" // Deep Pink
         };
         _barConfig.Data.Datasets.Add(dataset);
     }
@@ -95,7 +124,6 @@
     //The week starts on Monday and ends on Sunday
     private void CalculateCurrentWeekDates()
     {
-        
         var currentDate = DateTime.Now;
         var currentDayOfWeek = (int)currentDate.DayOfWeek;
         var currentWeekStartDate = currentDate.AddDays(-currentDayOfWeek + 1);
