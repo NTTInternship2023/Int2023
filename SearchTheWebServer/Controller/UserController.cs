@@ -247,14 +247,14 @@ namespace SearchTheWebServer.Controller
                 return Ok(movieDtos);
             }
         }
-        [HttpGet("Filter")]
-        public async Task<ActionResult<List<MovieDto>>> FilterMovies(string title, int? startYear, string? sort, string? titleType, int? endYear, int userId)
+        [HttpPost("Filter")]
+        public async Task<ActionResult<List<MovieDto>>> FilterMovies([FromBody]FilterDTO filterDTO)
         {
             
             //Request to the API
             var client = new HttpClient();
             var request = new HttpRequestMessage(HttpMethod.Get,
-                $"https://moviesdatabase.p.rapidapi.com/titles/search/title/{title}");
+                $"https://moviesdatabase.p.rapidapi.com/titles/search/title/{filterDTO.Title}");
             request.Headers.Add("X-RapidAPI-Host", ApiHost);
             request.Headers.Add("X-RapidAPI-Key", ApiKey);
 
@@ -264,15 +264,15 @@ namespace SearchTheWebServer.Controller
 
             //Validating input
             FilterParametersValidator validator = new FilterParametersValidator();
-            if (!validator.IsValidSort(sort))
+            if (!validator.IsValidSort(filterDTO.sort))
             {
                 return Conflict("Sort parameter is Invalid, only incr or decr available");
             }
-            if (!(validator.IsValidYear(endYear) && validator.IsValidYear(startYear)))
+            if (!(validator.IsValidYear(filterDTO.EndYear) && validator.IsValidYear(filterDTO.StartYear)))
             {
                 return Conflict("Invalid time parameters");
             }
-            if (!(validator.IsValidTimeInterval(startYear, endYear)))
+            if (!(validator.IsValidTimeInterval(filterDTO.StartYear, filterDTO.EndYear)))
             {
                 return Conflict("Invalid time interval");
             }
@@ -318,30 +318,30 @@ namespace SearchTheWebServer.Controller
                     });
                 }
 
-                if (startYear != null && endYear == null)
+                if (filterDTO.StartYear != null && filterDTO.EndYear == null)
                 {
-                   movieDtos= movieDtos.FindAll(m => m.ReleaseYear >= startYear);
+                   movieDtos= movieDtos.FindAll(m => m.ReleaseYear >= filterDTO.StartYear);
                 }
-                else if (startYear == null && endYear != null)
+                else if (filterDTO.StartYear == null && filterDTO.EndYear != null)
                 {
-                    movieDtos = movieDtos.FindAll(m => m.ReleaseYear <= endYear );
+                    movieDtos = movieDtos.FindAll(m => m.ReleaseYear <= filterDTO.EndYear );
                 }
-                else if( startYear != null && endYear != null )
+                else if( filterDTO.StartYear != null && filterDTO.EndYear != null )
                 {
-                    movieDtos = movieDtos.FindAll(m => (m.ReleaseYear <= endYear  && m.ReleaseYear >= startYear));
+                    movieDtos = movieDtos.FindAll(m => (m.ReleaseYear <= filterDTO.EndYear  && m.ReleaseYear >= filterDTO.StartYear));
                 }
           
                 var searchLog = new SearchLog
                 {
-                    IdUser = userId,
+                    IdUser = filterDTO.IdUser,
                     Date = DateTime.Now,
                     Action = "search",
-                    ActionDetail = title
+                    ActionDetail = filterDTO.Title
                 };
 
                 _context.SearchLogs.Add(searchLog);
                 await _context.SaveChangesAsync();
-                if (sort != null && sort.Equals("incr"))
+                if (filterDTO.sort != null && filterDTO.sort.Equals("incr"))
                 {
                    return Ok(movieDtos.OrderBy(m => m.ReleaseYear));
 
@@ -353,4 +353,3 @@ namespace SearchTheWebServer.Controller
         }
     }
 }
-

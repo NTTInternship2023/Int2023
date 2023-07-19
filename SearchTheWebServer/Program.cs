@@ -23,7 +23,9 @@ builder.Services.AddCors(options =>
                .AllowAnyHeader()
                .AllowAnyMethod()
                .WithExposedHeaders("Content-Disposition")
-               .SetPreflightMaxAge(TimeSpan.FromMinutes(10));
+               .SetPreflightMaxAge(TimeSpan.FromMinutes(10))
+               .WithExposedHeaders("Content-Type")
+               .WithHeaders("Access-Control-Allow-Headers");
 
     });
 });
@@ -39,6 +41,11 @@ if (app.Environment.IsDevelopment())
 
 app.Use((ctx,next)=>{
     ctx.Response.Headers["Access-Control-Allow-Origin"]="*";
+    return next();
+});
+
+app.Use((ctx,next)=>{
+    ctx.Response.Headers["Access-Control-Allow-Headers"]="*";
     return next();
 });
 
