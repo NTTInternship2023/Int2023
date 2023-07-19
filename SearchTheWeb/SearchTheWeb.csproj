@@ -10,6 +10,16 @@
     <PackageReference Include="MatBlazor" Version="2.10.0" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="6.0.16" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="6.0.16" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.2.0" />
+  </ItemGroup>
+<!-- ssd
+  <ItemGroup>
+    <ProjectReference Include="..\SearchTheWebServer\SearchTheWebServer.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Reference Include="SearchTheWebServer">
+      <HintPath>..\SearchTheWebServer\bin\Debug\net6.0\SearchTheWebServer.dll</HintPath>
+    </Reference>
+  </ItemGroup>-->
 </Project>

@@ -42,13 +42,13 @@ namespace SearchTheWebServer.Controller
                 user.PasswordHash = passwordHash;
                 user.PasswordSalt = passwordSalt;
                 //Creating the entity for the db
-                User newUser = new User { Username = userDto.Username, Email= userDto.Email, PasswordHash = user.PasswordHash, PasswordSalt = user.PasswordSalt };
+                User newUser = new User { Username = userDto.Username, Email = userDto.Email, PasswordHash = user.PasswordHash, PasswordSalt = user.PasswordSalt };
 
                 //Adding and saving the entity for the db
                 _context.Users.Add(newUser);
                 await _context.SaveChangesAsync();
 
-                return Ok($"New user created!Welcome, {newUser.Username}!");
+                return Ok($"New user created! Welcome, {newUser.Username}!");
             }
             catch (Exception ex)
             {
@@ -57,25 +57,26 @@ namespace SearchTheWebServer.Controller
         }
 
         [HttpPost("login")]
-        public async Task<ActionResult<string>> Login(LoginUserDto userDto)
+        public async Task<(bool, ActionResult<string>)> Login(LoginUserDto userDto)
         {
             try {
                 var existingUser = await _context.Users.FirstOrDefaultAsync(u => u.Username == userDto.Username);
                
                 if (existingUser == null )
                 {
-                    return ("Username unregister, please register");
+                    return (false, "Username unregister, please register");
+                    //return ("Username unregister, please register");
                 }
                
                 else if (!VerifyPasswordHash(userDto.Password, existingUser.PasswordHash, existingUser.PasswordSalt))
                 {
-                    return ("Wrong password");
+                    return (false, "Wrong password");
                 }
                
-                return ("Succesful Login");
+                return (true, "Succesful Login");
             }
             catch (Exception ex) {
-                return StatusCode(500, $"Error logging in: {ex.Message}");
+                return (false, StatusCode(500, $"Error logging in: {ex.Message}"));
             }
         }
         [HttpPost("changepassword")]
