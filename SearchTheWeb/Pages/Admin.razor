@@ -78,9 +78,10 @@
         <table class="table table-striped">
             <thead>
                 <tr>
+                    <th>id</th>
+                    <th>IdUser</th>
                     <th>Date</th>
-                    <th>Name</th>
-                    <th>Recent Activity</th>
+                    <th>Action</th>
                     <th>Details</th>
                 </tr>
             </thead>
@@ -90,16 +91,16 @@
                     <tr>
                         <td>@user.id</td>
                         <td>@user.IdUser</td>
-                        <td>@user.Date</td>
+                        <td>@user.Date.ToShortDateString()</td>
                         <td>@user.Action</td>
-                        <td>@user.ActionDetails</td>
+                        <td>@user.ActionDetail</td>
                     </tr>
-                    @if (user.ShowDetails)
+                    @* @if (user.ShowDetail)
                     {
                         <tr>
-                            <td colspan="4">Details: @user.ActionDetails</td>
+                            <td colspan="4">Details: @user.ActionDetail</td>
                         </tr>
-                    }
+                    } *@
                 }
             </tbody>
         </table>
@@ -164,14 +165,14 @@
         var save=await response.Content.ReadFromJsonAsync<List<SearchLog>>();
         
         foreach(var ceva in save){
-            @* SearchLog searchLog= new SearchLog();
+            SearchLog searchLog= new SearchLog();
             searchLog.id=ceva.id;
             searchLog.IdUser=ceva.IdUser;
             searchLog.Date=ceva.Date;
             searchLog.Action=ceva.Action;
-            searchLog.ActionDetails=ceva.ActionDetails; *@
+            searchLog.ActionDetail=ceva.ActionDetail;
 
-            users.Add(ceva);
+            users.Add(searchLog);
         }
         
     }
@@ -227,8 +228,8 @@
         public int IdUser {get; set;}
         public DateTime Date { get; set; }
         public string Action { get; set; }
-        public string ActionDetails { get; set; }
-        public bool ShowDetails { get; set; } = false;
+        public string ActionDetail { get; set; }
+        @* public bool ShowDetails { get; set; } = false; *@
     }
 }
 

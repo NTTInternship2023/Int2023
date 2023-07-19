@@ -49,13 +49,16 @@ namespace SearchTheWebServer.Controller
             return LastLog;
         }
 
-        [HttpPost]
+        [HttpGet]
         [Route("Suggestions")]
-        public async Task<ActionResult<List<SearchLog>>> GetSearchSuggestions([FromBody] string hint)
+        public async Task<ActionResult<HashSet<string>>> GetSearchSuggestions( string hint)
         {
-            Console.WriteLine(hint);
             var searchSuggestions = (await _db.SearchLogs.Where(w => w.ActionDetail.StartsWith(hint)).ToListAsync()).ToList();
-            return searchSuggestions;
+            HashSet<string> suggestions = new HashSet<string>();
+            foreach (var search in searchSuggestions){
+                suggestions.Add(search.ActionDetail);
+            }
+            return suggestions;
         }
 
         [HttpPost]
