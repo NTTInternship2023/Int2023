@@ -214,7 +214,7 @@ namespace SearchTheWebServer.Controller
                     double rating;
 
                     var imageString = imageElement.ValueKind == JsonValueKind.Null
-                        ? null
+                        ? "https://reprospecialty.com/wp-content/themes/apexclinic/images/no-image/No-Image-Found-400x264.png"
                         : imageElement.GetProperty("url").ToString();
                     var releaseYear = element.GetProperty("releaseYear").GetProperty("year").GetInt32();
 
@@ -301,7 +301,7 @@ namespace SearchTheWebServer.Controller
                     double rating;
 
                     var imageString = imageElement.ValueKind == JsonValueKind.Null
-                        ? "https://gomagcdn.ro/domains/dorianpopa.ro/files/product/medium/tricou-hatz-college-48-1205.jpg"
+                        ? "https://reprospecialty.com/wp-content/themes/apexclinic/images/no-image/No-Image-Found-400x264.png"
                         : imageElement.GetProperty("url").ToString();
                     var releaseYear = element.GetProperty("releaseYear").GetProperty("year").GetInt32();
 
