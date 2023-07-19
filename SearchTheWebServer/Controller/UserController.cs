@@ -214,7 +214,7 @@ namespace SearchTheWebServer.Controller
                     double rating;
 
                     var imageString = imageElement.ValueKind == JsonValueKind.Null
-                        ? "https://gomagcdn.ro/domains/dorianpopa.ro/files/product/medium/tricou-hatz-college-48-1205.jpg"
+                        ? null
                         : imageElement.GetProperty("url").ToString();
                     var releaseYear = element.GetProperty("releaseYear").GetProperty("year").GetInt32();
 
