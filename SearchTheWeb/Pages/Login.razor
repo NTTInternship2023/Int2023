@@ -1,7 +1,11 @@
 @page "/login"
+
 @layout LoginLayout
 @inject IJSRuntime JsRuntime
 @inject NavigationManager NavigationManager
+
+@using SearchTheWeb.Controller
+@using SearchTheWeb.Models
 
 @namespace SearchTheWeb.Pages
 
@@ -9,6 +13,9 @@
     <h1>LOGIN</h1>
     <div class="box">
         <div class="inside_box">
+            <p class="warning"> 
+                @warningMessage
+            </p>
             <p>
                 <MatTextField @bind-Value="@Username" Label="Username/Email" Outlined="true"></MatTextField>
             </p>
@@ -16,8 +23,8 @@
                 <MatTextField @bind-Value="@Password" Label="Password" Outlined="true" Type="password"></MatTextField>
             </p>
             <div class="button">
-                <MatButton Outlined="true" Style="align-self: flex-start; color: black" OnClick="@openPopup">Register</MatButton>
-                <MatButton Raised="true" Style="align-self: flex-end;" OnClick="@NavigateToMain">Sign In</MatButton>
+                <MatButton @onclick="() => setPopup(true)" Outlined="true" Style="align-self: flex-start; color: black">Register</MatButton>
+                <MatButton Raised="true" Style="align-self: flex-end;" OnClick="@AssignUserLogin">Sign In</MatButton>
             </div>
         </div>
     </div>
@@ -42,32 +49,82 @@
                     <MatTextField @bind-Value="@ConfirmNewPassword" Label="Confirm Password" Outlined="true" Type="password"></MatTextField>
                 </p>
             </div>
-            <MatButton Outlined="true" Style="align-self: flex-start; color: black" OnClick="@closePopup">Cancel</MatButton>
-            <MatButton Raised="true" Style="align-self: flex-start;">Sign Up</MatButton>
+            <div>
+                <MatButton @onclick="() => setPopup(false)" Outlined="true" Style="align-self: flex-start; color: black">Cancel</MatButton>
+                <MatButton @onclick="() => {setPopup(false); AssignUserRegister();}" Raised="true" Style="align-self: flex-start;">Sign Up</MatButton>
+            </div>
         </div>
     </div>
 }
+
 @code
 {
-    string? Username;
-    string? NewUsername;
-    string? NewEmail;
-    string? Password;
-    string? NewPassword;
-    string? ConfirmNewPassword;
+    string Username = string.Empty;
+    string Password = string.Empty;
+
+    string NewUsername = string.Empty;
+    string NewEmail = string.Empty;
+    string NewPassword = string.Empty;
+    string ConfirmNewPassword = string.Empty;
+
     bool PopupActive = false;
-    void openPopup()
+
+    string warningMessage = string.Empty;
+
+    LoginRegisterCheck verify = new();
+    LoginUserDto userDto = new();
+    RegisterUserDto regUserDto = new();
+
+    void setPopup(bool state) => PopupActive = state;
+    bool checkLogin()
     {
-        PopupActive = true;
+        if(verify.LoginCheck(userDto).Result.Item2 != null)
+            warningMessage = verify.LoginCheck(userDto).Result.Item2!;
+
+        return verify.LoginCheck(userDto).Result.Item1;
     }
-    void closePopup()
+    bool checkRegister()
     {
-        PopupActive = false;
+        if(verify.RegisterCheck(regUserDto).Result.Item2 != null)
+            warningMessage = verify.RegisterCheck(regUserDto).Result.Item2!;
+
+        return verify.RegisterCheck(regUserDto).Result.Item1;
     }
-    private void NavigateToMain()
+    void setWarning(bool state)
     {
-        //to implement validation
-        NavigationManager.NavigateTo("/search");
+        if (!state)
+            warningMessage = string.Empty;
+        else if(string.IsNullOrEmpty(warningMessage))
+            warningMessage = "Unknown Error!";
+    }
+    private void AssignUserLogin()
+    {
+        userDto.Username = Username;
+        userDto.Password = Password;
+
+        //Confirm Login
+        if (checkLogin())
+        {
+            setWarning(false);
+            NavigationManager.NavigateTo("/search");
+        }
+        else
+            setWarning(true);
+    }
+    private void AssignUserRegister()
+    {
+        regUserDto.Username = NewUsername;
+        regUserDto.Email = NewEmail;
+        regUserDto.Password = NewPassword;
+        
+        //Confirm Register
+        if (checkRegister())
+        {
+            setWarning(false);
+            setPopup(false);
+        }
+        else
+            setWarning(true);
     }
 }
 

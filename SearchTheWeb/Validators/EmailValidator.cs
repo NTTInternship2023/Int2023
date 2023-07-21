@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Text.RegularExpressions;
 
-namespace SearchTheWebServer.Validators
+namespace SearchTheWeb.Validators
 {
     public static class EmailValidator
     {

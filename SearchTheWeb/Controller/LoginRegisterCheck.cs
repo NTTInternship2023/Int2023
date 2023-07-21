@@ -2,32 +2,33 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using SearchTheWebServer.Controller;
-using SearchTheWebServer.Models;
+using SearchTheWeb.Controller;
+using SearchTheWeb.Models;
 
-using SearchTheWebServer.Data;
+using SearchTheWeb.Data;
 
 using Microsoft.AspNetCore.Mvc;
 
-namespace SearchTheWebServer
+namespace SearchTheWeb.Controller
 {
     public class LoginRegisterCheck
     {
-        static readonly AppDbContext tempContext;
-
+        static readonly AppDbContext? tempContext;
+    
         readonly UserController controller = new(tempContext);
         User user = new();
         private readonly HttpClient httpClient;
 
+        /*
         public LoginRegisterCheck(HttpClient httpClient)
         {
             this.httpClient = httpClient;
-        }
+        } */
 
         public async Task<(bool, string?)> LoginCheck(LoginUserDto loginUserDto){
             var result = await controller.Login(loginUserDto);
             return (result.Item1, result.Item2.Value);
-        }
+        } 
 
         public async Task<(bool, string?)> RegisterCheck(RegisterUserDto registerUserDto)
         {

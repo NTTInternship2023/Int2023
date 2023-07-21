@@ -18,9 +18,5 @@
   <ItemGroup>
     <Folder Include="Controllers\" />
   </ItemGroup>
-
-  <!--<ItemGroup>
-    <ProjectReference Include="..\SearchTheWeb\SearchTheWeb.csproj" />
-  </ItemGroup>-->
-
+  
 </Project>
