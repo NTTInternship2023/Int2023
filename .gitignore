@@ -5,3 +5,5 @@
 /SearchTheWebServer/obj/*
 /SearchTheWebServer/bin/*
 /.vscode/*
+/SearchTheWebServer/.vs/SearchTheWebServer
+*.wsuo

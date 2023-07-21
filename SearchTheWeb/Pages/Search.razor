@@ -1,6 +1,10 @@
 @page "/search"
 @inject HttpClient Http
 @inject NavigationManager NavigationManager
+@using System.Text
+@using System.Net.Http
+@using System.Text.Json
+@using Microsoft.Extensions.Http
 
 <PageTitle>Search Hashtag</PageTitle>
 
@@ -30,13 +34,33 @@
 
 <form class="search-form">
     <div class="search-bar">
-        <input type="text" class="form-control search-input" id="searchInput" @bind="@searchTerm" placeholder="Enter your search term" />
-        <datalist id="nameSuggestions">
-            @foreach (var suggestion in GetSearchSuggestions())
-            {
-                <option value="@suggestion" />
+        <input type="text" list="txtsearch"  @bind="@searchTerm" placeholder="Enter your search term" @oninput="GetSearchSuggestions"/>
+        <datalist id="txtsearch">
+            @foreach(var item in lista){
+                <option>@item</option>
             }
         </datalist>
+        @* <select @bind="searchTerm">
+            @foreach (var option in lista)
+            {
+                <option value="@option">@option</option>
+            }
+        </select> *@
+        <br> -Start Year-
+        <input type="text" class="form-control search-input" id="StartYear" @bind="@StartYear" placeholder="Start Year" />
+         -End Year-
+        <input type="text" class="form-control search-input" id="endYear" @bind="@EndYear" />
+        -Sortare-
+        <select class="form-control search-input" @bind="@Sort">
+            <option>incr</option>
+            <option>decr</option>
+        </select>
+        -Tipul-
+       <select class="form-control search-input" @bind="@TitleType">
+            <option>movie</option>
+            <option>tvSeries</option>
+        </select>
+        
     </div>
     <button type="button" class="btn btn-primary search-button" @onclick="PerformSearch">Search</button>
 </form>
@@ -44,23 +68,23 @@
 
 @if (!showUserPopup)  // Display hashtags only if user popup is not shown
 {
-    if (hashtags == null)
+    if (movies == null)
     {
         <p><em>Loading...</em></p>
     }
-    else if (hashtags.Length == 0)
+    else if (movies.Count == 0)
     {
         <p>No results found.</p>
     }
     else
     {
         <div class="hashtag-container">
-            @foreach (var hashtag in hashtags)
+            @foreach (var movie in movies)
             {
                 <div class="hashtag-box">
-                    <img src="@hashtag.PhotoUrl" alt="Hashtag Photo" class="hashtag-image" />
-                    <h3>@hashtag.Name</h3>
-                    <p>@hashtag.Summary</p>
+                    <img src="@movie.imageUrl" alt="Hashtag Photo" class="hashtag-image" />
+                    <h3>@movie.title</h3>
+                    <p>@movie.releaseYear      @movie.rating</p>
                 </div>
             }
         </div>
@@ -72,7 +96,13 @@
 @code {
     private SearchTerm[] allHashtags;
     private SearchTerm[] hashtags;
+    private List<string> lista=new List<string>();
+    private List<Movie> movies;
     private string searchTerm;
+    private int StartYear;
+    private string Sort;
+    private string TitleType;
+    private int EndYear=2024;
     private string currentUser = "John";
     private bool showUserPopup = false;
 
@@ -81,23 +111,61 @@
         // Initialize data
         allHashtags = await Http.GetFromJsonAsync<SearchTerm[]>("/sample-data/weather.json");
         hashtags = allHashtags;
+         lista = new List<string>();
+        movies=new List<Movie>();
     }
 
-    private IEnumerable<string> GetSearchSuggestions()
+    private async Task GetSearchSuggestions()
+{ 
+    try
     {
-        return allHashtags.Select(h => h.Name).Distinct();
-    }
+        var httpClient = new HttpClient();
 
-    private void PerformSearch()
+        if (!string.IsNullOrEmpty(searchTerm))
+        {
+            var request=new HttpRequestMessage(HttpMethod.Get, $"https://localhost:7194/Logger/Suggestions?hint={searchTerm}");
+            var response=await httpClient.SendAsync(request);
+            response.EnsureSuccessStatusCode();
+            lista=await response.Content.ReadFromJsonAsync<List<string>>();
+            StateHasChanged();
+        }
+        else{
+            lista.Clear();
+            StateHasChanged();
+        }
+        
+    }
+    catch (Exception ex)
     {
-        if (string.IsNullOrEmpty(searchTerm))
-        {
-            hashtags = allHashtags;
-        }
-        else
-        {
-            hashtags = allHashtags.Where(h => h.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)).ToArray();
-        }
+        // Afiseaza detaliile exceptiei in consola pentru debug
+        Console.WriteLine(ex.ToString());
+    }
+}
+
+    private async void PerformSearch()
+    {
+        HttpClient client=new HttpClient();
+        var jsonContent= new{
+            Title= searchTerm,
+            StartYear=StartYear,
+            sort=Sort,
+            TitleType=TitleType,
+            EndYear=EndYear,
+            IdUser=2
+        };
+
+        string jsonString = JsonSerializer.Serialize(jsonContent);
+
+        HttpContent content=new StringContent(jsonString,Encoding.UTF8,"application/json");
+        
+        
+        HttpResponseMessage response = await client.PostAsync("https://localho.st:7194/api/User/Filter", content);
+
+        var responseContent = await response.Content.ReadAsStringAsync();
+
+        movies=JsonSerializer.Deserialize<List<Movie>>(responseContent);
+        
+        StateHasChanged();
     }
 
     private void ShowUserPopup()
@@ -116,6 +184,15 @@
         public string Name { get; set; }
         public string Summary { get; set; }
         public string PhotoUrl { get; set; }
+    }
+
+    public class Movie
+    {
+        public string id{get; set;}
+        public string title{get;set;}
+        public string? imageUrl { get; set; }
+        public int releaseYear { get; set; }
+        public double rating { get; set; }
     }
 }
 
