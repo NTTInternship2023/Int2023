@@ -4,7 +4,7 @@
 @using System.Text
 @using System.Net.Http
 @using System.Text.Json
-@using Microsoft.Extensions.Http
+<!--@using Microsoft.Extensions.Http-->
 
 <PageTitle>Search Hashtag</PageTitle>
 
@@ -151,7 +151,7 @@
             sort=Sort,
             TitleType=TitleType,
             EndYear=EndYear,
-            IdUser=2
+            IdUser=2 // de modificat sa foloseasca id user logat
         };
 
         string jsonString = JsonSerializer.Serialize(jsonContent);

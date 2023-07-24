@@ -62,36 +62,36 @@ namespace SearchTheWebServer.Controller
         }
 
         [HttpPost("login")]
-        public async Task<(bool, ActionResult<string>)> Login(LoginUserDto userDto)
+        public async Task<ActionResult<LoginStatus>> Login([FromBody]LoginUserDto userDto)
         {
+            LoginStatus loginStatus = new LoginStatus();
             try
             {
                 var existingUser = await _context.Users.FirstOrDefaultAsync(u => u.Username == userDto.Username);
 
                 if (existingUser == null)
                 {
-                    return (false, "Username unregister, please register");
-                    //return ("Username unregister, please register");
+                   
+                         loginStatus.Status= false;
+                         loginStatus.Message= "Username unregister, please register";
+                          return loginStatus;
                 }
 
                 else if (!VerifyPasswordHash(userDto.Password, existingUser.PasswordHash, existingUser.PasswordSalt))
                 {
-                    return (false, "Wrong password");
+                     loginStatus.Status= false;
+                         loginStatus.Message= "Wrong password";
+                          return loginStatus;
                 }
-<<<<<<< HEAD
-               
-                return (true, "Succesful Login");
+                        loginStatus.Status= true;
+                         loginStatus.Message= "Succesful Login";
+                          return loginStatus;
+                
             }
             catch (Exception ex) {
-                return (false, StatusCode(500, $"Error logging in: {ex.Message}"));
-=======
-
-                return ("Succesful Login");
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Error logging in: {ex.Message}");
->>>>>>> main
+                         loginStatus.Status= false;
+                         loginStatus.Message= "Error logging in";
+                        return loginStatus;
             }
         }
         [HttpPost("changepassword")]

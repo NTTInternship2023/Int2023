@@ -1,11 +1,16 @@
 @page "/login"
 
 @layout LoginLayout
+
+@inject HttpClient Http
 @inject IJSRuntime JsRuntime
 @inject NavigationManager NavigationManager
 
-@using SearchTheWeb.Controller
 @using SearchTheWeb.Models
+@using System.Text
+@using System.Net.Http
+@using System.Text.Json
+@inject ILocalStorageService _localstorage;
 
 @namespace SearchTheWeb.Pages
 
@@ -24,7 +29,7 @@
             </p>
             <div class="button">
                 <MatButton @onclick="() => setPopup(true)" Outlined="true" Style="align-self: flex-start; color: black">Register</MatButton>
-                <MatButton Raised="true" Style="align-self: flex-end;" OnClick="@AssignUserLogin">Sign In</MatButton>
+                <MatButton Raised="true" Style="align-self: flex-end;" OnClick="@HandleLogin">Sign In</MatButton>
             </div>
         </div>
     </div>
@@ -59,6 +64,15 @@
 
 @code
 {
+    
+
+    public class LoginStatus
+    {
+        public string message{ get; set;}="";
+        public bool status { get; set; }=false;
+    }
+
+
     string Username = string.Empty;
     string Password = string.Empty;
 
@@ -71,60 +85,73 @@
 
     string warningMessage = string.Empty;
 
-    LoginRegisterCheck verify = new();
+    private readonly HttpClient client;
+    private List<LoginUserDto> user;
     LoginUserDto userDto = new();
     RegisterUserDto regUserDto = new();
 
+    LoginStatus loginStatus = new();
+
     void setPopup(bool state) => PopupActive = state;
-    bool checkLogin()
-    {
-        if(verify.LoginCheck(userDto).Result.Item2 != null)
-            warningMessage = verify.LoginCheck(userDto).Result.Item2!;
-
-        return verify.LoginCheck(userDto).Result.Item1;
-    }
-    bool checkRegister()
-    {
-        if(verify.RegisterCheck(regUserDto).Result.Item2 != null)
-            warningMessage = verify.RegisterCheck(regUserDto).Result.Item2!;
-
-        return verify.RegisterCheck(regUserDto).Result.Item1;
-    }
-    void setWarning(bool state)
+    void setWarning(bool state, string? message)
     {
         if (!state)
             warningMessage = string.Empty;
-        else if(string.IsNullOrEmpty(warningMessage))
+        else
+            warningMessage = message;
+
+        if(string.IsNullOrEmpty(warningMessage))
             warningMessage = "Unknown Error!";
     }
     private void AssignUserLogin()
     {
         userDto.Username = Username;
         userDto.Password = Password;
-
-        //Confirm Login
-        if (checkLogin())
-        {
-            setWarning(false);
-            NavigationManager.NavigateTo("/search");
-        }
-        else
-            setWarning(true);
+        Console.WriteLine(userDto.Username);
+        Console.WriteLine(userDto.Password);
     }
     private void AssignUserRegister()
     {
         regUserDto.Username = NewUsername;
         regUserDto.Email = NewEmail;
         regUserDto.Password = NewPassword;
-        
-        //Confirm Register
-        if (checkRegister())
-        {
-            setWarning(false);
-            setPopup(false);
+    }
+
+    private async Task HandleLogin()
+    {
+        if(Username.Length<6){
+            Console.WriteLine("Validare username <6");
+            return;
         }
-        else
-            setWarning(true);
+
+        HttpClient client=new HttpClient();
+        var jsonContent= new{
+            Username = Username,
+            Password = Password
+        };
+        userDto.Username = Username;
+        userDto.Password = Password;
+
+        string jsonString = JsonSerializer.Serialize(jsonContent);
+        Console.WriteLine(jsonString);
+        HttpContent content=new StringContent(jsonString,Encoding.UTF8,"application/json");
+        
+        // de modificat endpoint sa trimita id si username daca check-ul de login a trecut.
+        HttpResponseMessage response = await client.PostAsync("https://localhost:7194/api/User/login", content);
+        
+        var responseContent = await response.Content.ReadAsStringAsync();
+        Console.WriteLine(responseContent);
+        
+        loginStatus=JsonSerializer.Deserialize<LoginStatus>(responseContent);
+
+        
+        
+        Console.WriteLine(loginStatus.message);
+        Console.WriteLine(loginStatus.status);
+        Console.WriteLine(userDto.Username);
+        Console.WriteLine(userDto.Password);
+        //TODO:Redirect catre search page.
+        
     }
 }
 
