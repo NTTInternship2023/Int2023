@@ -1,0 +1,92 @@
+
+    /* Styles for other elements */
+
+    .user-info {
+        text-align: right;
+        margin-top: 10px;
+    }
+
+    .search-heading {
+        text-align: left;
+    }
+
+    /* User Popup Styles */
+    .user-popup {
+        position: fixed;
+        top: 60px;
+        right: 20px;
+        background-color: #fff;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        padding: 10px;
+        z-index: 9999;
+    }
+
+    .popup-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 9998;
+    }
+
+    .popup-content {
+        margin-bottom: 10px;
+        cursor: pointer;
+    }
+
+    .user-link {
+        cursor: pointer;
+        text-decoration: underline;
+    }
+   
+.search-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 20px;
+}
+
+.search-bar {
+    position: relative;
+    width: 200px; /* Adjust the width as desired */
+}
+
+.search-input {
+    width: 100%;
+}
+
+.hashtag-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.hashtag-box {
+    margin: 10px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    width: 300px;
+    text-align: center;
+}
+
+.hashtag-image {
+    width: 100%;
+    height: auto;
+    max-width: 200px; /* Adjust the maximum width as desired */
+}
+.popup-button {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    padding: 8px 16px;
+    margin-right: 10px;
+    cursor: pointer;
+}
+
+.popup-button:hover {
+    background-color: #0056b3;
+}
+

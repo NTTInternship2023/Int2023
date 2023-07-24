@@ -273,10 +273,11 @@ namespace SearchTheWebServer.Controller
 
             //Validating input
             FilterParametersValidator validator = new FilterParametersValidator();
-            if (!validator.IsValidSort(filterDTO.sort))
-            {
-                return Conflict("Sort parameter is Invalid, only incr or decr available");
-            }
+           if (filterDTO.sort != null && !validator.IsValidSort(filterDTO.sort))
+{
+    return Conflict("Sort parameter is Invalid, only incr or decr available");
+}
+
             if (!(validator.IsValidYear(filterDTO.EndYear) && validator.IsValidYear(filterDTO.StartYear)))
             {
                 return Conflict("Invalid time parameters");
@@ -340,22 +341,33 @@ namespace SearchTheWebServer.Controller
                     movieDtos = movieDtos.FindAll(m => (m.ReleaseYear <= filterDTO.EndYear  && m.ReleaseYear >= filterDTO.StartYear));
                 }
           
-                var searchLog = new SearchLog
-                {
-                    IdUser = filterDTO.IdUser,
-                    Date = DateTime.Now,
-                    Action = "search",
-                    ActionDetail = filterDTO.Title
-                };
+var searchLog = new SearchLog
+{
+    IdUser = filterDTO?.IdUser ?? default,
+    Date = DateTime.Now,
+    Action = "search",
+    ActionDetail = filterDTO?.Title ?? string.Empty
+};
+
+
+
+
 
                 _context.SearchLogs.Add(searchLog);
                 await _context.SaveChangesAsync();
-                if (filterDTO.sort != null && filterDTO.sort.Equals("incr"))
-                {
-                   return Ok(movieDtos.OrderBy(m => m.ReleaseYear));
+if (string.Equals(filterDTO?.sort, "incr", StringComparison.OrdinalIgnoreCase))
+{
+    return Ok(movieDtos.OrderBy(m => m.ReleaseYear));
+}
+else
+{
+    return Ok(movieDtos.OrderByDescending(m => m.ReleaseYear));
+}
 
-                }
-                else return Ok(movieDtos.OrderByDescending(m => m.ReleaseYear));
+
+
+
+
              
             }
 

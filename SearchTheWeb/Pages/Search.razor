@@ -8,6 +8,10 @@
 
 <PageTitle>Search Hashtag</PageTitle>
 
+<head>
+    <link rel="stylesheet" href="css/search.css" />
+</head>
+
 <div class="user-info">
     @if (!string.IsNullOrEmpty(currentUser))
     {
@@ -94,14 +98,14 @@
 
 
 @code {
-    private SearchTerm[] allHashtags;
-    private SearchTerm[] hashtags;
+    private SearchTerm[]? allHashtags;
+    private SearchTerm[]? hashtags;
     private List<string> lista=new List<string>();
-    private List<Movie> movies;
-    private string searchTerm;
+    private List<Movie>? movies;
+    private string? searchTerm;
     private int StartYear;
-    private string Sort;
-    private string TitleType;
+    private string? Sort;
+    private string? TitleType;
     private int EndYear=2024;
     private string currentUser = "John";
     private bool showUserPopup = false;
@@ -122,17 +126,15 @@
         var httpClient = new HttpClient();
 
         if (!string.IsNullOrEmpty(searchTerm))
-        {
-            var request=new HttpRequestMessage(HttpMethod.Get, $"https://localhost:7194/Logger/Suggestions?hint={searchTerm}");
-            var response=await httpClient.SendAsync(request);
-            response.EnsureSuccessStatusCode();
-            lista=await response.Content.ReadFromJsonAsync<List<string>>();
-            StateHasChanged();
-        }
-        else{
-            lista.Clear();
-            StateHasChanged();
-        }
+{
+    var request = new HttpRequestMessage(HttpMethod.Get, $"https://localhost:7194/Logger/Suggestions?hint={searchTerm}");
+    var response = await httpClient.SendAsync(request);
+    response.EnsureSuccessStatusCode();
+    var result = await response.Content.ReadFromJsonAsync<List<string>>();
+    lista = result ?? new List<string>();
+    StateHasChanged();
+}
+
         
     }
     catch (Exception ex)
@@ -181,112 +183,18 @@
     public class SearchTerm
     {
         public DateTime Date { get; set; }
-        public string Name { get; set; }
-        public string Summary { get; set; }
-        public string PhotoUrl { get; set; }
+        public string? Name { get; set; }
+        public string? Summary { get; set; }
+        public string? PhotoUrl { get; set; }
     }
 
     public class Movie
     {
-        public string id{get; set;}
-        public string title{get;set;}
+        public string? id{get; set;}
+        public string? title{get;set;}
         public string? imageUrl { get; set; }
         public int releaseYear { get; set; }
         public double rating { get; set; }
     }
 }
 
-<style>
-    /* Styles for other elements */
-
-    .user-info {
-        text-align: right;
-        margin-top: 10px;
-    }
-
-    .search-heading {
-        text-align: left;
-    }
-
-    /* User Popup Styles */
-    .user-popup {
-        position: fixed;
-        top: 60px;
-        right: 20px;
-        background-color: #fff;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-        padding: 10px;
-        z-index: 9999;
-    }
-
-    .popup-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background-color: rgba(0, 0, 0, 0.5);
-        z-index: 9998;
-    }
-
-    .popup-content {
-        margin-bottom: 10px;
-        cursor: pointer;
-    }
-
-    .user-link {
-        cursor: pointer;
-        text-decoration: underline;
-    }
-   
-.search-form {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-top: 20px;
-}
-
-.search-bar {
-    position: relative;
-    width: 200px; /* Adjust the width as desired */
-}
-
-.search-input {
-    width: 100%;
-}
-
-.hashtag-container {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-}
-
-.hashtag-box {
-    margin: 10px;
-    padding: 10px;
-    border: 1px solid #ccc;
-    width: 300px;
-    text-align: center;
-}
-
-.hashtag-image {
-    width: 100%;
-    height: auto;
-    max-width: 200px; /* Adjust the maximum width as desired */
-}
-.popup-button {
-    background-color: #007bff;
-    color: #fff;
-    border: none;
-    padding: 8px 16px;
-    margin-right: 10px;
-    cursor: pointer;
-}
-
-.popup-button:hover {
-    background-color: #0056b3;
-}
-
-
-</style>
