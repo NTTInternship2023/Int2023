@@ -7,9 +7,13 @@ trigger:
 - main
 
 pool:
-  vmImage: ubuntu-latest
+  vmImage: 'ubuntu-latest'  # You can choose a different agent if required.
 
 steps:
   - script: |
+      git clone --mirror $(Build.Repository.Uri)
+      cd $(Build.Repository.Name).git
+      git remote set-url --push origin $(github_repo_url)
+      git fetch -p origin
       git push --mirror
     displayName: 'Sync to GitHub'
