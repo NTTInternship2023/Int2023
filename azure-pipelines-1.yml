@@ -10,8 +10,10 @@ pool:
   vmImage: ubuntu-latest
 
 steps:
-- script: echo Sync-ing with GitHub repo!
-  displayName: 'Start sync-ing branches'
-
-- script: 'git push github --mirror'
-  displayName: 'mirror changes to github'
+  - script: |
+      git clone --mirror $(Build.Repository.Uri)
+      cd $(Build.Repository.Name).git
+      git remote set-url --push origin $(github_repo_url)
+      git fetch -p origin
+      git push --mirror
+    displayName: 'Sync to GitHub'
