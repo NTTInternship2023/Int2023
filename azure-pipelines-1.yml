@@ -11,9 +11,5 @@ pool:
 
 steps:
   - script: |
-      git clone --mirror $(Build.Repository.Uri)
-      cd $(Build.Repository.Name).git
-      git remote set-url --push origin $(github_repo_url)
-      git fetch -p origin
       git push --mirror
     displayName: 'Sync to GitHub'
