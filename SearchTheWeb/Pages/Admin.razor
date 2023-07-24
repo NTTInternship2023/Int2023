@@ -1,0 +1,352 @@
+@page "/admin"
+
+@using System.Text
+@using System.Net.Http
+@using System.Text.Json
+@using Microsoft.Extensions.Http
+
+@inject HttpClient Http
+
+<PageTitle>Admin</PageTitle>
+
+<h1>Admin Page</h1>
+<div class="user-info">
+    @if (!string.IsNullOrEmpty(currentUser))
+    {
+        <p>Logged in as: <a class="user-link" @onclick="ToggleUserPopup">@currentUser</a></p>
+        <div class="user-popup" style="display: @(showUserPopup ? "block" : "none")">
+            <button class="popup-button">Log out</button>
+            <button class="popup-button">Change Password</button>
+        </div>
+        <div class="popup-overlay" style="display: @(showUserPopup ? "block" : "none")" @onclick="CloseUserPopup"></div>
+    }
+    else
+    {
+        <p>Not logged in.</p>
+    }
+</div>
+
+<form class="search-form">
+    <div class="search-bar">
+        <input type="text" class="form-control" id="searchInput" list="nameSuggestions" @bind="@searchTerm" placeholder="Enter your search term" />
+        @if (string.IsNullOrEmpty(searchTerm))
+        {
+            <span class="search-icon">
+                <i class="bi bi-search"></i>
+            </span>
+        }
+    </div>
+    <button type="button" class="btn btn-primary search-button" @onclick="PerformSearch">Search</button>
+</form>
+
+<div class="admin-actions">
+    <button type="button" class="btn btn-success add-button" disabled @onclick="OpenAddHashtagPopup">Add Hashtag</button>
+    <button type="button" class="btn btn-primary view-activity-button" @onclick="ToggleUserActivity">View User Activity</button>
+    <button type="button" class="btn btn-primary show-hide-button" disabled @onclick="ToggleShowHidePosts">Show/Hide Posts</button>
+</div>
+@* 
+<div class="hashtag-container" style="display: @(showPosts ? "flex" : "none")">
+    @if (hashtags == null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else if (hashtags.Length == 0)
+    {
+        <p>No results found.</p>
+    }
+    else
+    {
+        @foreach (var hashtag in hashtags)
+        {
+            <div class="hashtag-box">
+                <img src="@hashtag.PhotoUrl" alt="Hashtag Photo" class="hashtag-image" />
+                <h3>@hashtag.Name</h3>
+                <p>@hashtag.Summary</p>
+                @if (showPosts)
+                {
+                    <button class="btn btn-danger delete-button" @onclick="() => DeleteHashtag(hashtag)">Delete</button>
+                }
+            </div>
+        }
+    }
+</div> *@
+
+@if (showUserActivity)
+{
+    <div class="user-activity">
+        <h2>User Activity</h2>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>id</th>
+                    <th>IdUser</th>
+                    <th>Date</th>
+                    <th>Action</th>
+                    <th>Details</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var user in users)
+                {
+                    <tr>
+                        <td>@user.id</td>
+                        <td>@user.IdUser</td>
+                        <td>@user.Date.ToShortDateString()</td>
+                        <td>@user.Action</td>
+                        <td>@user.ActionDetail</td>
+                    </tr>
+                    @* @if (user.ShowDetail)
+                    {
+                        <tr>
+                            <td colspan="4">Details: @user.ActionDetail</td>
+                        </tr>
+                    } *@
+                }
+            </tbody>
+        </table>
+    </div>
+}
+@* 
+@if (showAddHashtagPopup)
+{
+    <div class="add-hashtag-popup">
+        <h2>Add Hashtag</h2>
+        <div class="form-group">
+            <label for="photoUrlInput">Photo URL:</label>
+            <input type="text" class="form-control" id="photoUrlInput" @bind="@newHashtag.PhotoUrl" />
+        </div>
+        <div class="form-group">
+            <label for="nameInput">Name:</label>
+            <input type="text" class="form-control" id="nameInput" @bind="@newHashtag.Name" />
+        </div>
+        <div class="form-group">
+            <label for="summaryInput">Summary:</label>
+            <textarea class="form-control" id="summaryInput" rows="3" @bind="@newHashtag.Summary"></textarea>
+        </div>
+        <button type="button" class="btn btn-primary" @onclick="AddHashtag">Add</button>
+        <button type="button" class="btn btn-secondary" @onclick="CloseAddHashtagPopup">Cancel</button>
+    </div>
+} *@
+
+@code {
+    private SearchTerm[] allHashtags;
+    private SearchTerm[] hashtags;
+    private string searchTerm;
+    private string currentUser = "Admin";
+    private SearchTerm newHashtag;
+    private bool showAddHashtagPopup = false;
+    private bool showUserActivity = false;
+    private List<SearchLog> users=new List<SearchLog>();
+    private bool showPosts = true;
+    private bool showUserPopup = false;
+
+    private void ToggleUserPopup()
+    {
+        showUserPopup = !showUserPopup;
+    }
+
+    private void CloseUserPopup()
+    {
+        showUserPopup = false;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        allHashtags = await Http.GetFromJsonAsync<SearchTerm[]>("sample-data/weather.json");
+        hashtags = allHashtags;
+        newHashtag = new SearchTerm();
+
+        // Dummy data for user activity
+        var httpClient = new HttpClient();
+        var request=new HttpRequestMessage(HttpMethod.Get, "https://localho.st:7194/Logger/GetAll");
+
+        var response=await httpClient.SendAsync(request);
+        response.EnsureSuccessStatusCode();
+        var save=await response.Content.ReadFromJsonAsync<List<SearchLog>>();
+        
+        foreach(var ceva in save){
+            SearchLog searchLog= new SearchLog();
+            searchLog.id=ceva.id;
+            searchLog.IdUser=ceva.IdUser;
+            searchLog.Date=ceva.Date;
+            searchLog.Action=ceva.Action;
+            searchLog.ActionDetail=ceva.ActionDetail;
+
+            users.Add(searchLog);
+        }
+        
+    }
+
+    private IEnumerable<string> GetAvailableNames()
+    {
+        return allHashtags.Select(h => h.Name).Distinct();
+    }
+
+    private void PerformSearch()
+    {
+        if (string.IsNullOrEmpty(searchTerm))
+        {
+            hashtags = allHashtags;
+        }
+        else
+        {
+            hashtags = allHashtags.Where(h => h.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)).ToArray();
+        }
+    }
+
+    private void OpenAddHashtagPopup()
+    {
+        showAddHashtagPopup = true;
+    }
+
+    private void CloseAddHashtagPopup()
+    {
+        showAddHashtagPopup = false;
+    }
+
+    private void ToggleUserActivity()
+    {
+        showUserActivity = !showUserActivity;
+    }
+
+    private void ToggleShowHidePosts()
+    {
+        showPosts = !showPosts;
+    }
+
+    public class SearchTerm
+    {
+        public DateTime Date { get; set; }
+        public string Name { get; set; }
+        public string Summary { get; set; }
+        public string PhotoUrl { get; set; }
+    }
+
+    public class SearchLog
+    {
+        public int id {get; set;}
+        public int IdUser {get; set;}
+        public DateTime Date { get; set; }
+        public string Action { get; set; }
+        public string ActionDetail { get; set; }
+        @* public bool ShowDetails { get; set; } = false; *@
+    }
+}
+
+<style>
+    .hashtag-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .hashtag-box {
+        margin: 10px;
+        padding: 10px;
+        border: 1px solid #ccc;
+        position: relative;
+    }
+
+    .hashtag-image {
+        width: 300px;
+        height: auto;
+    }
+
+    .user-info {
+        margin-top: 10px;
+    }
+
+    .search-form {
+        display: flex;
+        align-items: flex-end;
+        margin-top: 20px;
+    }
+
+    .search-bar {
+        position: relative;
+    }
+
+    .search-icon {
+        position: absolute;
+        top: 50%;
+        left: 10px;
+        transform: translateY(-50%);
+        color: #6c757d;
+    }
+
+    .search-button {
+        width: auto;
+    }
+
+    .admin-actions {
+        margin-top: 20px;
+    }
+
+    .add-button {
+        width: auto;
+    }
+
+    .view-activity-button {
+        width: auto;
+    }
+
+    .show-hide-button {
+        width: auto;
+    }
+
+    .user-activity {
+        margin-top: 20px;
+    }
+
+    .add-hashtag-popup {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        padding: 20px;
+        background-color: #fff;
+        border: 1px solid #ccc;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    }
+
+    .delete-button {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        display: @(showPosts ? "block" : "none");
+    }
+
+    .popup-button {
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        padding: 8px 16px;
+        margin-right: 10px;
+        cursor: pointer;
+    }
+
+    .popup-button:hover {
+        background-color: #0056b3;
+    }
+
+    .user-popup {
+        position: absolute;
+        top: 30px;
+        right: 10px;
+        background-color: #fff;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        padding: 10px;
+        z-index: 9999;
+    }
+
+    .popup-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 9998;
+    }
+</style>

@@ -1,0 +1,41 @@
+﻿<div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
+    <nav class="flex-column">
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="index">
+                <span class="oi oi-list-rich" aria-hidden="true"></span> Start Page
+            </NavLink>
+        </div>
+
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="search">
+                <span class="oi oi-list-rich" aria-hidden="true"></span> Main Page
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="admin">
+                <span class="oi oi-list-rich" aria-hidden="true"></span> Admin
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="weeklysearchgraph">
+                <span class="oi oi-list-rich" aria-hidden="true"></span> Top Weekly Searches
+            </NavLink>
+        </div>
+    </nav>
+</div>
+
+@code {
+    private bool collapseNavMenu = true;
+    private string currentUser = "John"; // Replace with your authentication logic to set the current user
+
+    private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+
+    private void ToggleNavMenu()
+    {
+        collapseNavMenu = !collapseNavMenu;
+    }
+
+}
