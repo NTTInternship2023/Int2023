@@ -14,3 +14,5 @@ Aplicatie Back-end + Front-end ce interogheaza 3rd party API si afiseaza rezulta
 - [ASP .NET Core Web APIs](https://learn.microsoft.com/ro-ro/aspnet/core/web-api/?WT.mc_id=dotnet-35129-website&view=aspnetcore-6.0)
 - [SQL Server Management System \(SSMS\))](https://learn.microsoft.com/en-us/sql/ssms/sql-server-management-studio-ssms?view=sql-server-ver16)
 - [Docker](https://docker-curriculum.com/)
+
+We are synced!
