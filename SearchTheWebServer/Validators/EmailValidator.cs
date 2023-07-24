@@ -8,7 +8,8 @@ namespace SearchTheWebServer.Validators
         public static bool EmailPatternValidation(string? emailInput)
         {
             var emailformat = new Regex("^[A-Za-z0-9._%+-]+@[a-z.-]+.(com|ro)$");
-            var isValidated = emailformat.IsMatch(emailInput);
+           var isValidated = emailInput != null && emailformat.IsMatch(emailInput);
+
 
             if (isValidated) return true;
             else return false;      

@@ -7,7 +7,7 @@ namespace SearchTheWebServer.Models
 {
     public class FilterDTO
     {
-        public string Title { get; set; }
+        public string? Title { get; set; }
         public int? StartYear { get; set; }
         public string? sort { get; set; }
         public string? TitleType { get; set; }

@@ -22,11 +22,10 @@ namespace SearchTheWebServer.Controller
         private readonly ILogger<LoggerController> _logger; // Add the logger
         public class LogItem
         {
-            public string Keyword { get; set; }
+            public string? Keyword { get; set; }
             public int TotalSearches { get; set; }
             public int WeekNumber { get; set; }
         }
-
 
         public LoggerController(AppDbContext db, ILogger<LoggerController> logger) // Modify the constructor
         {
@@ -125,8 +124,7 @@ public ActionResult<IEnumerable<LogItem>> GetLogItems(int? limit = null)
     }
 }
 
-
-        private int GetWeekNumber(DateTime date)
+        private static int GetWeekNumber(DateTime date)
         {
             CultureInfo ci = CultureInfo.CurrentCulture;
             return ci.Calendar.GetWeekOfYear(date, CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday);
