@@ -82,13 +82,13 @@
                 
                 <div class="hashtag-box">
                     <div class="image-container">
-                    <img src="@movie.imageUrl" alt="Movie Photo" class="hashtag-image" />
                         <div class="container" >
                             <img class="image" src="/images/icons8-ribbon-nomination-100.png" alt="Imagine">
                             <span class="number_nomination">@movie.nomination</span>
                             <img class="image" src="/images/icons8-ribbon-award-100.png" alt="Imagine">
                             <span class="number_award">@movie.award</span>
                         </div>
+                        <img src="@movie.imageUrl" alt="Hashtag Photo" class="hashtag-image" />
                     </div>
                     <div class="movie-info">
                         <h3>@movie.title</h3>
@@ -96,7 +96,7 @@
                     <p>  <div class="stars"><span class="tooltiptext">@movie.numVotes votes</span><div class="percent" style="width:@ReturnStarRating(movie.rating);"></div></div></p>
           
                     </div>
-                </div>
+                    </div>
             }
         </div>
     }

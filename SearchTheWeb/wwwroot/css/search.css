@@ -139,6 +139,16 @@
     border-radius: 5px; /* Ajustează colțurile rotunjite pentru număr */
 }
 
+.number_award {
+    position: absolute;
+    top: 45px; /* Ajustează poziția verticală a numărului */
+    left: 20px; /* Ajustează poziția orizontală a numărului */
+    font-size: 24px; /* Ajustează dimensiunea fontului pentru număr */
+    color: white; /* Ajustează culoarea textului pentru număr */
+    padding: 5px 10px; /* Ajustează padding-ul pentru număr */
+    border-radius: 5px;
+}
+
     .stars .percent {
         position: absolute;
         left: 0;
@@ -164,6 +174,10 @@
 
 li {
     display: table;
+}
+.movie-info {
+    display: flex;
+    flex-direction: column;
 }
 .movie-info {
     display: flex;
