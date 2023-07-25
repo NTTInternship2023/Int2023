@@ -85,10 +85,21 @@
         <div class="hashtag-container">
             @foreach (var movie in movies)
             {
+                
                 <div class="hashtag-box">
-                    <img src="@movie.imageUrl" alt="Hashtag Photo" class="hashtag-image" />
-                    <h3>@movie.title</h3>
-                    <p>@movie.releaseYear      @movie.rating</p>
+                    <div class="image-container">
+                        <div class="container" >
+                            <img class="image" src="/images/icons8-ribbon-nomination-100.png" alt="Imagine">
+                            <span class="number_nomination">@movie.nomination</span>
+                            <img class="image" src="/images/icons8-ribbon-award-100.png" alt="Imagine">
+                            <span class="number_award">@movie.award</span>
+                        </div>
+                        <img src="@movie.imageUrl" alt="Hashtag Photo" class="hashtag-image" />
+                    </div>
+                    <div class="movie-info">
+                        <h3>@movie.title</h3>
+                        <p>@movie.releaseYear      @movie.rating</p>
+                    </div>
                 </div>
             }
         </div>
@@ -166,6 +177,16 @@
         var responseContent = await response.Content.ReadAsStringAsync();
 
         movies=JsonSerializer.Deserialize<List<Movie>>(responseContent);
+
+        foreach(var movie in movies){
+            Random random = new Random();
+            int x = random.Next(0, 10);
+            int y = random.Next(0, 10);
+
+            movie.nomination=x;
+            movie.award=y;
+
+        }
         
         StateHasChanged();
     }
@@ -180,6 +201,7 @@
         showUserPopup = false;
     }
 
+    
     public class SearchTerm
     {
         public DateTime Date { get; set; }
@@ -195,6 +217,8 @@
         public string? imageUrl { get; set; }
         public int releaseYear { get; set; }
         public double rating { get; set; }
+        public int? nomination=0;
+        public int? award=0;
     }
 }
 
