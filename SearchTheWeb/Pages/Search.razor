@@ -1,6 +1,7 @@
 @page "/search"
 @inject HttpClient Http
 @inject NavigationManager NavigationManager
+@inject ILocalStorageService _localstorage;
 @using System.Text
 @using System.Net.Http
 @using System.Text.Json
@@ -95,8 +96,6 @@
     }
 }
 
-
-
 @code {
     private SearchTerm[]? allHashtags;
     private SearchTerm[]? hashtags;
@@ -107,8 +106,9 @@
     private string? Sort;
     private string? TitleType;
     private int EndYear=2024;
-    private string currentUser = "John";
+    private string currentUser = "N/A";
     private bool showUserPopup = false;
+    private int localId;
 
     protected override async Task OnInitializedAsync()
     {
@@ -117,6 +117,9 @@
         hashtags = allHashtags;
          lista = new List<string>();
         movies=new List<Movie>();
+        localId = await _localstorage.GetItemAsync<int>("id");
+        currentUser = await _localstorage.GetItemAsync<string>("username");
+            Console.WriteLine(localId);
     }
 
     private async Task GetSearchSuggestions()
@@ -153,7 +156,7 @@
             sort=Sort,
             TitleType=TitleType,
             EndYear=EndYear,
-            IdUser=2 // de modificat sa foloseasca id user logat
+            IdUser=localId //modificat sa foloseasca id user logat
         };
 
         string jsonString = JsonSerializer.Serialize(jsonContent);

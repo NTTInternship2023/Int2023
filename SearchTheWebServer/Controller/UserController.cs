@@ -25,7 +25,7 @@ namespace SearchTheWebServer.Controller
         }
 
         [HttpPost("register")]
-        public async Task<ActionResult<User>> Register(RegisterUserDto userDto)
+        public async Task<ActionResult<User>> Register([FromBody]RegisterUserDto userDto)
         {
             try
             {
@@ -71,27 +71,28 @@ namespace SearchTheWebServer.Controller
 
                 if (existingUser == null)
                 {
-                   
-                         loginStatus.Status= false;
-                         loginStatus.Message= "Username unregister, please register";
-                          return loginStatus;
+                    loginStatus.Status= false;
+                    loginStatus.Message= "Username unregistered, please register";
+                    return loginStatus;
                 }
 
                 else if (!VerifyPasswordHash(userDto.Password, existingUser.PasswordHash, existingUser.PasswordSalt))
                 {
-                     loginStatus.Status= false;
-                         loginStatus.Message= "Wrong password";
-                          return loginStatus;
+                    loginStatus.Status= false;
+                    loginStatus.Message= "Wrong password";
+                    return loginStatus;
                 }
-                        loginStatus.Status= true;
-                         loginStatus.Message= "Succesful Login";
-                          return loginStatus;
+                loginStatus.Id = existingUser.Id;
+                loginStatus.Username = existingUser.Username;
+                loginStatus.Status= true;
+                loginStatus.Message= "Succesful Login";
+                return loginStatus;
                 
             }
             catch (Exception ex) {
-                         loginStatus.Status= false;
-                         loginStatus.Message= "Error logging in";
-                        return loginStatus;
+                loginStatus.Status= false;
+                loginStatus.Message= $"Error logging in: {ex}";
+                return loginStatus;
             }
         }
         [HttpPost("changepassword")]
