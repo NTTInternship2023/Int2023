@@ -32,9 +32,7 @@
 </div>
 
 
-<h1 class="search-heading">Search Hashtag</h1>
-
-<p>This component demonstrates fetching data from the server.</p>
+<h1 class="search-heading">Search Title</h1>
 
 <form class="search-form">
     <div class="search-bar">
@@ -61,8 +59,9 @@
         </select>
         -Tipul-
        <select class="form-control search-input" @bind="@TitleType">
-            <option>movie</option>
-            <option>tvSeries</option>
+            <option value="movie,tvSeries">All</option>
+            <option value="movie">movie</option>
+            <option value="tvSeries">tvSeries</option>
         </select>
         
     </div>
@@ -86,10 +85,13 @@
             @foreach (var movie in movies)
             {
                 <div class="hashtag-box">
-                    <img src="@movie.imageUrl" alt="Hashtag Photo" class="hashtag-image" />
+                    <img src="@movie.imageUrl" alt="Movie Photo" class="hashtag-image" />
                     <h3>@movie.title</h3>
-                    <p>@movie.releaseYear      @movie.rating</p>
+                    <p>Release year: @movie.releaseYear</p>
+                    <p>  <div class="stars"><span class="tooltiptext">@movie.numVotes votes</span><div class="percent" style="width:@ReturnStarRating(movie.rating);"></div></div></p>
+          
                 </div>
+           
             }
         </div>
     }
@@ -115,34 +117,34 @@
         // Initialize data
         allHashtags = await Http.GetFromJsonAsync<SearchTerm[]>("/sample-data/weather.json");
         hashtags = allHashtags;
-         lista = new List<string>();
+        lista = new List<string>();
         movies=new List<Movie>();
     }
 
     private async Task GetSearchSuggestions()
-{ 
-    try
-    {
-        var httpClient = new HttpClient();
+    { 
+        try
+        {
+            var httpClient = new HttpClient();
 
-        if (!string.IsNullOrEmpty(searchTerm))
-{
-    var request = new HttpRequestMessage(HttpMethod.Get, $"https://localhost:7194/Logger/Suggestions?hint={searchTerm}");
-    var response = await httpClient.SendAsync(request);
-    response.EnsureSuccessStatusCode();
-    var result = await response.Content.ReadFromJsonAsync<List<string>>();
-    lista = result ?? new List<string>();
-    StateHasChanged();
-}
+            if (!string.IsNullOrEmpty(searchTerm))
+            {
+                var request = new HttpRequestMessage(HttpMethod.Get, $"https://localhost:7194/Logger/Suggestions?hint={searchTerm}");
+                var response = await httpClient.SendAsync(request);
+                response.EnsureSuccessStatusCode();
+                var result = await response.Content.ReadFromJsonAsync<List<string>>();
+                lista = result ?? new List<string>();
+                StateHasChanged();
+            }
 
-        
+
+        }
+        catch (Exception ex)
+        {
+            // Afiseaza detaliile exceptiei in consola pentru debug
+            Console.WriteLine(ex.ToString());
+        }
     }
-    catch (Exception ex)
-    {
-        // Afiseaza detaliile exceptiei in consola pentru debug
-        Console.WriteLine(ex.ToString());
-    }
-}
 
     private async void PerformSearch()
     {
@@ -159,15 +161,22 @@
         string jsonString = JsonSerializer.Serialize(jsonContent);
 
         HttpContent content=new StringContent(jsonString,Encoding.UTF8,"application/json");
-        
-        
+
+
         HttpResponseMessage response = await client.PostAsync("https://localho.st:7194/api/User/Filter", content);
 
-        var responseContent = await response.Content.ReadAsStringAsync();
+        if(response.IsSuccessStatusCode){
+            var responseContent = await response.Content.ReadAsStringAsync();
 
-        movies=JsonSerializer.Deserialize<List<Movie>>(responseContent);
-        
-        StateHasChanged();
+            movies=JsonSerializer.Deserialize<List<Movie>>(responseContent);
+
+            StateHasChanged();
+        }
+        else{
+            Console.WriteLine("Error");
+        }
+
+
     }
 
     private void ShowUserPopup()
@@ -195,6 +204,19 @@
         public string? imageUrl { get; set; }
         public int releaseYear { get; set; }
         public double rating { get; set; }
+        public int numVotes { get; set; }
+    }
+    public string ReturnStarRating(double? rating)
+    {
+        string starRating = "0%";
+        if(rating!=null)
+        {
+            rating *= 10;
+            starRating = rating.ToString() + "%";
+        }
+       
+        return starRating;
+
     }
 }
 
