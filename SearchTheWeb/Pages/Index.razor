@@ -1,11 +1,17 @@
 ﻿@page "/index"
 @using System
 @using System.Collections.Generic
+@using System.Globalization
 @using System.Linq
+@using System.Text.Json
+@inject HttpClient HttpClient
+
 
 <head>
     <link rel="stylesheet" href="css/index.css" />
 </head>
+
+<h1 id = "heading">Simplify IMDB's most searched titles</h1>
 
 <div class="container">
     <div class="word-cloud">
@@ -14,7 +20,7 @@
             {
                 @foreach (var cloudWord in topSearches.Take(10).Select((value, index) => new { Value = value, Index = index }))
                 {
-                    int baseFontSize = 14;
+                    int baseFontSize = 12;
                     int decreaseFactor = 4;
                     int wordSize = baseFontSize + (10 - cloudWord.Index) * decreaseFactor;
 
@@ -27,8 +33,8 @@
 
                     do
                     {
-                        leftPosition = random.Next(0, 101); // Random left position between 0% and 100%
-                        topPosition = random.Next(0, 101); // Random top position between 0% and 100%
+                        leftPosition = random.Next(0, 100); // Random left position between 0% and 100%
+                        topPosition = random.Next(0, 100); // Random top position between 0% and 100%
 
                         collisionDetected = placedWords != null && placedWords.Any(placedWord =>
                         {
@@ -42,9 +48,9 @@
 
                         // Check if the word exceeds the container boundaries
                         bool exceedsBoundaries = leftPosition - wordSize / 2 < 0
-                            || leftPosition + wordSize / 2 > 100
+                            || leftPosition + wordSize / 2 > 300
                             || topPosition - wordSize / 2 < 0
-                            || topPosition + wordSize / 2 > 100;
+                            || topPosition + wordSize / 2 > 300;
 
                         collisionDetected = collisionDetected || exceedsBoundaries;
 
@@ -75,9 +81,20 @@
 
 
 @code {
+    static readonly CultureInfo _ci = CultureInfo.CurrentCulture;
+    readonly int _currentWeekNumber = _ci.Calendar.GetWeekOfYear(DateTime.Now, CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday);
+    private class SearchData
+    {
+        public string keyword { get; set; } = string.Empty;
+        public int totalSearches { get; set; }
+        public int weekNumber { get; set; }
+    }
+    private List<SearchData> _searchDatas = new();
+
+    
      private Random random = new Random();
     
-    List<string>? topSearches;
+    List<string>? topSearches = new List<string>();
     List<WordProperties>? placedWords;
          
 
@@ -90,16 +107,26 @@
         public int Left { get; set; }
     }
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
+        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7194/Logger/SearchAction");
+        var response = await HttpClient.SendAsync(request);
+        if (response.IsSuccessStatusCode)
+        {
+            var responseContent = await response.Content.ReadAsStringAsync();
+            var searchDatas = JsonSerializer.Deserialize<List<SearchData>>(responseContent);
+            _searchDatas = searchDatas!;
+        }
         
+        _searchDatas = _searchDatas.Where(x => x.weekNumber == _currentWeekNumber).ToList();
+        _searchDatas = _searchDatas.Take(7).ToList();
+        
+        foreach (var searchData in _searchDatas)
+        {
+            topSearches.Add(searchData.keyword);
+        }
 
         random = new Random();
-        topSearches = new List<string>()
-        {
-            "Sci-Fi", "Horror", "RomCom", "Thriller", "Action", "Drama", "Tragic", "Comedy", "Artistic", "Tv-Show"
-        };
-
         topSearches = topSearches.OrderBy(x => random.Next()).ToList();
         placedWords = new List<WordProperties>();
     }
