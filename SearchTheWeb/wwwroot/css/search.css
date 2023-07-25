@@ -89,6 +89,33 @@
 .popup-button:hover {
     background-color: #0056b3;
 }
+/*Star rating functionality*/
+.stars {
+    position: relative;
+    float: left;
+    font-size: 25pt;
+    height: 1em;
+    line-height: 1em;
+   padding-left: 75px;
+}
+
+    .stars .tooltiptext {
+        visibility: hidden;
+        width: 120px;
+        background-color: #555;
+        color: #fff;
+        text-align: center;
+        border-radius: 6px;
+        font-size:medium;
+        padding: 5px 0;
+        position: absolute;
+        z-index: 1;
+        bottom: 125%;
+        left: 50%;
+        margin-left: -22.5px;
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
 
 .container {
     position: relative;
@@ -112,15 +139,15 @@
     border-radius: 5px; /* Ajustează colțurile rotunjite pentru număr */
 }
 
-.number_award {
-    position: absolute;
-    top: 45px; /* Ajustează poziția verticală a numărului */
-    left: 20px; /* Ajustează poziția orizontală a numărului */
-    font-size: 24px; /* Ajustează dimensiunea fontului pentru număr */
-    color: white; /* Ajustează culoarea textului pentru număr */
-    padding: 5px 10px; /* Ajustează padding-ul pentru număr */
-    border-radius: 5px;
-}
+    .stars .percent {
+        position: absolute;
+        left: 0;
+        float: left;
+        overflow: hidden;
+        z-index: -1;
+        filter: drop-shadow(0px 5px 4px black);
+        padding-left: 75px;
+    }
 
 .image-container {
     display: flex;
@@ -130,6 +157,14 @@
     height: 70%;
 }
 
+        .stars .percent:after {
+            content: "\2605\2605\2605\2605\2605";
+            color: rgb(255, 200, 0);
+        }
+
+li {
+    display: table;
+}
 .movie-info {
     display: flex;
     flex-direction: column;
