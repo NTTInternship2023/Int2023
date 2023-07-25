@@ -117,22 +117,16 @@
             var searchDatas = JsonSerializer.Deserialize<List<SearchData>>(responseContent);
             _searchDatas = searchDatas!;
         }
+        
         _searchDatas = _searchDatas.Where(x => x.weekNumber == _currentWeekNumber).ToList();
         _searchDatas = _searchDatas.Take(7).ToList();
+        
         foreach (var searchData in _searchDatas)
         {
-            
-            Console.WriteLine($"{searchData.keyword}   |    {searchData.totalSearches}");
             topSearches.Add(searchData.keyword);
         }
 
         random = new Random();
-        
-        foreach(var search in topSearches)
-        {
-            Console.WriteLine(search);
-        }
-        
         topSearches = topSearches.OrderBy(x => random.Next()).ToList();
         placedWords = new List<WordProperties>();
     }
