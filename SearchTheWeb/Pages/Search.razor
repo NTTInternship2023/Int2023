@@ -88,7 +88,6 @@
                             <img class="image" src="/images/icons8-ribbon-award-100.png" alt="Imagine">
                             <span class="number_award">@movie.award</span>
                         </div>
-                        <img src="@movie.imageUrl" alt="Hashtag Photo" class="hashtag-image" />
                     </div>
                     <div class="movie-info">
                         <h3>@movie.title</h3>
@@ -97,6 +96,7 @@
           
                     </div>
                     </div>
+           
             }
         </div>
     }
@@ -213,8 +213,6 @@
         else{
             Console.WriteLine("Error");
         }
-
-
     }
 
     private async Task LogOut()
@@ -232,27 +230,7 @@
     {
         showUserPopup = false;
     }
-
     
-    public class SearchTerm
-    {
-        public DateTime Date { get; set; }
-        public string? Name { get; set; }
-        public string? Summary { get; set; }
-        public string? PhotoUrl { get; set; }
-    }
-
-    public class Movie
-    {
-        public string? id{get; set;}
-        public string? title{get;set;}
-        public string? imageUrl { get; set; }
-        public int releaseYear { get; set; }
-        public double rating { get; set; }
-        public int? nomination=0;
-        public int? award=0;
-        public int numVotes { get; set; }
-    }
     public string ReturnStarRating(double? rating)
     {
         string starRating = "0%";
