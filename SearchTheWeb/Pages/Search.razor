@@ -34,22 +34,15 @@
 
 <h1 class="search-heading">Search Hashtag</h1>
 
-<p>This component demonstrates fetching data from the server.</p>
-
 <form class="search-form">
     <div class="search-bar">
-        <input type="text" list="txtsearch"  @bind="@searchTerm" placeholder="Enter your search term" @oninput="GetSearchSuggestions"/>
+        <input id="searchBox" type="text" list="txtsearch" @oninput="@UpdateSearchTermString" placeholder="Enter your search term"/>
         <datalist id="txtsearch">
+            @if(lista!=null)
             @foreach(var item in lista){
                 <option>@item</option>
             }
         </datalist>
-        @* <select @bind="searchTerm">
-            @foreach (var option in lista)
-            {
-                <option value="@option">@option</option>
-            }
-        </select> *@
         <br> -Start Year-
         <input type="text" class="form-control search-input" id="StartYear" @bind="@StartYear" placeholder="Start Year" />
          -End Year-
@@ -98,11 +91,25 @@
 
 
 @code {
+    private void UpdateSearchTermString(ChangeEventArgs args)
+    {
+        SearchTermString = args.Value.ToString();
+    }
     private SearchTerm[]? allHashtags;
     private SearchTerm[]? hashtags;
-    private List<string> lista=new List<string>();
+    private List<string>? lista = new List<string>();
     private List<Movie>? movies;
-    private string? searchTerm;
+    private string? searchTerm = string.Empty;
+    private string? SearchTermString{
+        get {
+        return searchTerm;
+    }
+        set {
+        if(value!=null){
+           Task.Run( async() => await GetSearchSuggestions(value));
+            searchTerm=value;
+        }
+    }}
     private int StartYear;
     private string? Sort;
     private string? TitleType;
@@ -115,25 +122,31 @@
         // Initialize data
         allHashtags = await Http.GetFromJsonAsync<SearchTerm[]>("/sample-data/weather.json");
         hashtags = allHashtags;
-         lista = new List<string>();
         movies=new List<Movie>();
     }
 
-    private async Task GetSearchSuggestions()
-{ 
+    private async Task GetSearchSuggestions(string? searchTerm = null)
+    { 
     try
     {
-        var httpClient = new HttpClient();
-
         if (!string.IsNullOrEmpty(searchTerm))
-{
-    var request = new HttpRequestMessage(HttpMethod.Get, $"https://localhost:7194/Logger/Suggestions?hint={searchTerm}");
-    var response = await httpClient.SendAsync(request);
-    response.EnsureSuccessStatusCode();
-    var result = await response.Content.ReadFromJsonAsync<List<string>>();
-    lista = result ?? new List<string>();
-    StateHasChanged();
-}
+        {
+            using(var httpClient = new HttpClient())
+            {
+                var request = new HttpRequestMessage(HttpMethod.Get, $"https://localhost:7194/Logger/Suggestions?hint={searchTerm}");
+                var response = await httpClient.SendAsync(request);
+                response.EnsureSuccessStatusCode();
+                var result = await response.Content.ReadFromJsonAsync<List<string>>();
+                Console.WriteLine(result);
+                if(result!=null){
+                    if(result.Count>10){
+                        result=result.GetRange(0,10);
+                    }
+                }
+                lista = result ?? null;
+                StateHasChanged();
+            }
+        }
 
         
     }
