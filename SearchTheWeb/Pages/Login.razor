@@ -1,6 +1,24 @@
 @page "/login"
+
 @layout LoginLayout
+
+@inject HttpClient Http
 @inject IJSRuntime JsRuntime
+@inject NavigationManager NavigationManager
+@inject ILocalStorageService _localstorage;
+
+@using SearchTheWeb.Models
+@using System.Text
+@using System.Net.Http
+@using System.Text.Json
+
+
+@namespace SearchTheWeb.Pages
+
+<head>
+    <link rel="stylesheet" href="css/Login.css" />
+</head>
+
 
 <div class="container">
     <h1>LOGIN</h1>
@@ -13,8 +31,8 @@
                 <MatTextField @bind-Value="@Password" Label="Password" Outlined="true" Type="password"></MatTextField>
             </p>
             <div class="button">
-                <MatButton Outlined="true" Style="align-self: flex-start; color: black" OnClick="@openPopup">Register</MatButton>
-                <MatButton Raised="true" Style="align-self: flex-end;">Sign In</MatButton>
+                <MatButton @onclick="() => setPopup(true)" Outlined="true" Style="align-self: flex-start; color: black">Register</MatButton>
+                <MatButton OnClick="@HandleLogin" Raised="true" Style="align-self: flex-end;">Sign In</MatButton>
             </div>
         </div>
     </div>
@@ -39,27 +57,153 @@
                     <MatTextField @bind-Value="@ConfirmNewPassword" Label="Confirm Password" Outlined="true" Type="password"></MatTextField>
                 </p>
             </div>
-            <MatButton Outlined="true" Style="align-self: flex-start; color: black" OnClick="@closePopup">Cancel</MatButton>
-            <MatButton Raised="true" Style="align-self: flex-start;">Sign Up</MatButton>
+            <div>
+                <MatButton @onclick="() => setPopup(false)" Outlined="true" Style="align-self: flex-start; color: black">Cancel</MatButton>
+                <MatButton OnClick="@HandleRegister" Raised="true" Style="align-self: flex-start;">Sign Up</MatButton>
+            </div>
         </div>
     </div>
 }
+
+@if (warningState)
+{
+    <div class="popup warning_box" style="display: flex">
+        <div class="popup-content">
+            <h1>@warningMessage</h1>
+            <div>
+                <MatButton @onclick="() => setWarning(false, string.Empty)" Outlined="true" Style="align-self: flex-start; color: black">Back</MatButton>
+            </div>
+        </div>
+    </div>
+}
+
 @code
 {
-    string? Username;
-    string? NewUsername;
-    string? NewEmail;
-    string? Password;
-    string? NewPassword;
-    string? ConfirmNewPassword;
+//VARIABILE SETATE
+    string Username = string.Empty;
+    string Password = string.Empty;
+
+    string NewUsername = string.Empty;
+    string NewEmail = string.Empty;
+    string NewPassword = string.Empty;
+    string ConfirmNewPassword = string.Empty;
+
     bool PopupActive = false;
-    void openPopup()
+
+    string warningMessage = string.Empty;
+    bool warningState = false;
+
+    LoginStatus loginStatus = new();
+    RegisterStatus registerStatus = new();
+
+//REGISTER/WARNING POPUP
+    void setPopup(bool state)
     {
-        Console.WriteLine(PopupActive);
+        PopupActive = state;
+        if (!state){
+            NewUsername = string.Empty;
+            NewEmail = string.Empty;
+            NewPassword = string.Empty;
+            ConfirmNewPassword = string.Empty;
+        }
     }
-    void closePopup()
+    void setWarning(bool state, string? message)
     {
-        PopupActive = false;
+        warningState = state;
+        if (!state)
+            warningMessage = string.Empty;
+        else
+            warningMessage = message!;
+
+        if(string.IsNullOrEmpty(warningMessage) && state)
+            warningMessage = "Unknown Error!";
+    }
+
+//HANDLERS
+    private async Task HandleLogin()
+    {
+        if(Username.Length<6){
+            setWarning(true,"Username invalid");
+            return;
+        }
+        if (string.IsNullOrEmpty(Password)){
+            setWarning(true,"Passwords field required");
+            return;
+        }
+
+        HttpClient client=new HttpClient();
+        var jsonContent= new{
+            Username = Username,
+            Password = Password
+        };
+
+        string jsonString = JsonSerializer.Serialize(jsonContent);
+        Console.WriteLine(jsonString);
+        HttpContent content=new StringContent(jsonString,Encoding.UTF8,"application/json");
+        
+        HttpResponseMessage response = await client.PostAsync("https://localhost:7194/api/User/login", content);
+        
+        var responseContent = await response.Content.ReadAsStringAsync();
+        Console.WriteLine(responseContent);
+        
+        loginStatus = JsonSerializer.Deserialize<LoginStatus>(responseContent)!;
+        
+        Console.WriteLine(loginStatus.id);
+        Console.WriteLine(loginStatus.username);
+        Console.WriteLine(loginStatus.message);
+        Console.WriteLine(loginStatus.status);
+
+        if (loginStatus.status)
+        {
+            await _localstorage.SetItemAsync("id", loginStatus.id);
+            await _localstorage.SetItemAsync("username", loginStatus.username);
+            setWarning(true, loginStatus.message);
+            NavigationManager.NavigateTo("../search", forceLoad:true);
+        }
+        else
+            setWarning(true, loginStatus.message);
+    }
+
+    private async Task HandleRegister()
+    {
+        if(NewUsername.Length<6){
+            setWarning(true,"Username must be at least 6 characters long.");
+            return;
+        }
+        if (string.IsNullOrEmpty(NewPassword)){
+            setWarning(true,"Passwords field required");
+            return;
+        }
+        if (NewPassword!=ConfirmNewPassword){
+            setWarning(true,"Passwords do not match");
+            return;
+        }
+
+        HttpClient client=new HttpClient();
+        var jsonContent= new{
+            Username = NewUsername,
+            Email = NewEmail,
+            Password = NewPassword
+        };
+
+        string jsonString = JsonSerializer.Serialize(jsonContent);
+        HttpContent content=new StringContent(jsonString,Encoding.UTF8,"application/json");
+        HttpResponseMessage response = await client.PostAsync("https://localhost:7194/api/User/register", content);
+
+        var responseContent = await response.Content.ReadAsStringAsync();
+
+        if(!response.IsSuccessStatusCode)
+        {
+            setWarning(true, responseContent);
+            Console.WriteLine($"Status: {response.StatusCode}");
+            Console.WriteLine($"Raspuns rau: {responseContent}");
+            return;
+        } else
+        {
+            Console.WriteLine($"Raspuns bun: {responseContent}");
+            setWarning(true, responseContent);
+            setPopup(false);
+        }
     }
 }
 

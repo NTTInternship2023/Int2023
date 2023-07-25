@@ -1,10 +1,10 @@
 @page "/search"
 @inject HttpClient Http
 @inject NavigationManager NavigationManager
+@inject ILocalStorageService _localstorage;
 @using System.Text
 @using System.Net.Http
 @using System.Text.Json
-@using Microsoft.Extensions.Http
 
 <PageTitle>Search Hashtag</PageTitle>
 
@@ -19,7 +19,7 @@
         @if (showUserPopup)
         {
             <div class="user-popup">
-                <button class="popup-button" @onclick="CloseUserPopup">Log out</button>
+                <button class="popup-button" @onclick="LogOut">Log out</button>
                 <button class="popup-button" @onclick="CloseUserPopup">Change Password</button>
             </div>
             <div class="popup-overlay" @onclick="CloseUserPopup"></div>
@@ -78,17 +78,26 @@
         <div class="hashtag-container">
             @foreach (var movie in movies)
             {
+                
                 <div class="hashtag-box">
-                    <img src="@movie.imageUrl" alt="Hashtag Photo" class="hashtag-image" />
-                    <h3>@movie.title</h3>
-                    <p>@movie.releaseYear      @movie.rating</p>
+                    <div class="image-container">
+                        <div class="container" >
+                            <img class="image" src="/images/icons8-ribbon-nomination-100.png" alt="Imagine">
+                            <span class="number_nomination">@movie.nomination</span>
+                            <img class="image" src="/images/icons8-ribbon-award-100.png" alt="Imagine">
+                            <span class="number_award">@movie.award</span>
+                        </div>
+                        <img src="@movie.imageUrl" alt="Hashtag Photo" class="hashtag-image" />
+                    </div>
+                    <div class="movie-info">
+                        <h3>@movie.title</h3>
+                        <p>@movie.releaseYear      @movie.rating</p>
+                    </div>
                 </div>
             }
         </div>
     }
 }
-
-
 
 @code {
     private void UpdateSearchTermString(ChangeEventArgs args)
@@ -114,8 +123,9 @@
     private string? Sort;
     private string? TitleType;
     private int EndYear=2024;
-    private string currentUser = "John";
+    private string currentUser = "N/A";
     private bool showUserPopup = false;
+    private int localId;
 
     protected override async Task OnInitializedAsync()
     {
@@ -123,6 +133,9 @@
         allHashtags = await Http.GetFromJsonAsync<SearchTerm[]>("/sample-data/weather.json");
         hashtags = allHashtags;
         movies=new List<Movie>();
+        localId = await _localstorage.GetItemAsync<int>("id");
+        currentUser = await _localstorage.GetItemAsync<string>("username");
+            Console.WriteLine(localId);
     }
 
     private async Task GetSearchSuggestions(string? searchTerm = null)
@@ -166,7 +179,7 @@
             sort=Sort,
             TitleType=TitleType,
             EndYear=EndYear,
-            IdUser=2
+            IdUser=localId //modificat sa foloseasca id user logat
         };
 
         string jsonString = JsonSerializer.Serialize(jsonContent);
@@ -179,10 +192,26 @@
         var responseContent = await response.Content.ReadAsStringAsync();
 
         movies=JsonSerializer.Deserialize<List<Movie>>(responseContent);
+
+        foreach(var movie in movies){
+            Random random = new Random();
+            int x = random.Next(0, 10);
+            int y = random.Next(0, 10);
+
+            movie.nomination=x;
+            movie.award=y;
+
+        }
         
         StateHasChanged();
     }
 
+    private async Task LogOut()
+    {
+        await _localstorage.RemoveItemAsync("id");
+        await _localstorage.RemoveItemAsync("username");
+        NavigationManager.NavigateTo("../login", forceLoad:true);
+    }
     private void ShowUserPopup()
     {
         showUserPopup = true;
@@ -193,6 +222,7 @@
         showUserPopup = false;
     }
 
+    
     public class SearchTerm
     {
         public DateTime Date { get; set; }
@@ -208,6 +238,8 @@
         public string? imageUrl { get; set; }
         public int releaseYear { get; set; }
         public double rating { get; set; }
+        public int? nomination=0;
+        public int? award=0;
     }
 }
 
