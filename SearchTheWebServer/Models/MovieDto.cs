@@ -8,4 +8,5 @@ public class MovieDto
     public int ReleaseYear { get; set; }
     
     public double Rating { get; set; }
+    public int? NumVotes { get; set; } = null;
 }

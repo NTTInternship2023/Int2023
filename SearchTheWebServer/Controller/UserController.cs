@@ -138,9 +138,10 @@ namespace SearchTheWebServer.Controller
          * Parameters: string movieId
          * Returns: double
          */
-        private async Task<ActionResult<double>> GetMovieRating(string movieId)
+        private async Task<(double,int)> GetMovieRating(string movieId)
         {
             double rating = 0;
+            int numVotes = 0;
             var client = new HttpClient();
             var request = new HttpRequestMessage
             {
@@ -164,13 +165,12 @@ namespace SearchTheWebServer.Controller
                 if (results.ValueKind != JsonValueKind.Null)
                 {
                     var ratingElement = results.GetProperty("averageRating");
-                    rating = ratingElement.ValueKind != JsonValueKind.Null
-                        ? results.GetProperty("averageRating").GetDouble()
-                        : 0;
+                    rating = results.GetProperty("averageRating").GetDouble();
+                    numVotes = results.GetProperty("numVotes").GetInt32();  
                 }
             }
 
-            return Ok(rating);
+            return (rating,numVotes);
         }
 
         /*
@@ -218,8 +218,7 @@ namespace SearchTheWebServer.Controller
                         : imageElement.GetProperty("url").ToString();
                     var releaseYear = element.GetProperty("releaseYear").GetProperty("year").GetInt32();
 
-                    var result = await GetMovieRating(idString);
-                    rating = result.Value;
+                    var ratingElement = await GetMovieRating(idString);
 
                     movieDtos.Add(new MovieDto
                     {
@@ -227,7 +226,8 @@ namespace SearchTheWebServer.Controller
                         Title = titleString,
                         ImageUrl = imageString,
                         ReleaseYear = releaseYear,
-                        Rating = rating
+                        Rating = ratingElement.Item1,
+                        NumVotes=ratingElement.Item2
                     });
                 }
 
@@ -260,7 +260,8 @@ namespace SearchTheWebServer.Controller
 
             var content = new MultipartFormDataContent();
             content.Add(new StringContent("false"), "exact");
-            content.Add(new StringContent("movie,tvSeries"), "titleType");
+            content.Add(new StringContent("20"), "limit");
+            content.Add(new StringContent(filterDTO.TitleType??"movie,tvSeries"), "titleType");
 
             //Validating input
             FilterParametersValidator validator = new FilterParametersValidator();
@@ -299,15 +300,14 @@ namespace SearchTheWebServer.Controller
                     var titleString = element.GetProperty("titleText").GetProperty("text").ToString();
                     var imageElement = element.GetProperty("primaryImage");
                     var idString = element.GetProperty("id").ToString();
-                    double rating;
+                    double rating=0;
 
                     var imageString = imageElement.ValueKind == JsonValueKind.Null
                         ? "https://reprospecialty.com/wp-content/themes/apexclinic/images/no-image/No-Image-Found-400x264.png"
                         : imageElement.GetProperty("url").ToString();
                     var releaseYear = element.GetProperty("releaseYear").GetProperty("year").GetInt32();
 
-                    var result = await GetMovieRating(idString);
-                    rating = result.Value;
+                    var ratingElement = await GetMovieRating(idString);
 
                     movieDtos.Add(new MovieDto
                     {
@@ -315,7 +315,8 @@ namespace SearchTheWebServer.Controller
                         Title = titleString,
                         ImageUrl = imageString,
                         ReleaseYear = releaseYear,
-                        Rating = rating
+                        Rating = ratingElement.Item1,
+                        NumVotes=ratingElement.Item2
                     });
                 }
 
