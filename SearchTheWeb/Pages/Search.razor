@@ -5,7 +5,6 @@
 @using System.Text
 @using System.Net.Http
 @using System.Text.Json
-<!--@using Microsoft.Extensions.Http-->
 
 <PageTitle>Search Hashtag</PageTitle>
 
@@ -20,7 +19,7 @@
         @if (showUserPopup)
         {
             <div class="user-popup">
-                <button class="popup-button" @onclick="CloseUserPopup">Log out</button>
+                <button class="popup-button" @onclick="LogOut">Log out</button>
                 <button class="popup-button" @onclick="CloseUserPopup">Change Password</button>
             </div>
             <div class="popup-overlay" @onclick="CloseUserPopup"></div>
@@ -173,6 +172,12 @@
         StateHasChanged();
     }
 
+    private async Task LogOut()
+    {
+        await _localstorage.RemoveItemAsync("id");
+        await _localstorage.RemoveItemAsync("username");
+        NavigationManager.NavigateTo("../login", forceLoad:true);
+    }
     private void ShowUserPopup()
     {
         showUserPopup = true;

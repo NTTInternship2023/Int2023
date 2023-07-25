@@ -275,9 +275,9 @@ namespace SearchTheWebServer.Controller
             //Validating input
             FilterParametersValidator validator = new FilterParametersValidator();
            if (filterDTO.sort != null && !validator.IsValidSort(filterDTO.sort))
-{
-    return Conflict("Sort parameter is Invalid, only incr or decr available");
-}
+            {
+                return Conflict("Sort parameter is Invalid, only incr or decr available");
+            }
 
             if (!(validator.IsValidYear(filterDTO.EndYear) && validator.IsValidYear(filterDTO.StartYear)))
             {

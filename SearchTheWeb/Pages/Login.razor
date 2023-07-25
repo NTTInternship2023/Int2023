@@ -15,6 +15,11 @@
 
 @namespace SearchTheWeb.Pages
 
+<head>
+    <link rel="stylesheet" href="css/Login.css" />
+</head>
+
+
 <div class="container">
     <h1>LOGIN</h1>
     <div class="box">
@@ -108,7 +113,7 @@
         if (!state)
             warningMessage = string.Empty;
         else
-            warningMessage = message;
+            warningMessage = message!;
 
         if(string.IsNullOrEmpty(warningMessage) && state)
             warningMessage = "Unknown Error!";
@@ -119,6 +124,10 @@
     {
         if(Username.Length<6){
             setWarning(true,"Username invalid");
+            return;
+        }
+        if (string.IsNullOrEmpty(Password)){
+            setWarning(true,"Passwords field required");
             return;
         }
 
@@ -132,19 +141,17 @@
         Console.WriteLine(jsonString);
         HttpContent content=new StringContent(jsonString,Encoding.UTF8,"application/json");
         
-        // de modificat endpoint sa trimita id si username daca check-ul de login a trecut.
         HttpResponseMessage response = await client.PostAsync("https://localhost:7194/api/User/login", content);
         
         var responseContent = await response.Content.ReadAsStringAsync();
         Console.WriteLine(responseContent);
         
-        loginStatus=JsonSerializer.Deserialize<LoginStatus>(responseContent);
+        loginStatus = JsonSerializer.Deserialize<LoginStatus>(responseContent)!;
         
         Console.WriteLine(loginStatus.id);
         Console.WriteLine(loginStatus.username);
         Console.WriteLine(loginStatus.message);
         Console.WriteLine(loginStatus.status);
-        //TODO:Redirect catre search page.
 
         if (loginStatus.status)
         {
