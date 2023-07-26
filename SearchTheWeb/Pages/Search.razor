@@ -1,7 +1,7 @@
 @page "/search"
 @inject HttpClient Http
 @inject NavigationManager NavigationManager
-@inject ILocalStorageService _localstorage;
+@inject ILocalStorageService _localstorage
 @using System.Text
 @using System.Net.Http
 @using System.Text.Json
@@ -124,7 +124,7 @@
         }
     }}
     private int StartYear;
-    private string? Sort;
+    private string? Sort = "incr";
     private string? TitleType;
     private int EndYear=2024;
     private string currentUser = "N/A";
@@ -200,12 +200,20 @@
             movies=JsonSerializer.Deserialize<List<Movie>>(responseContent);
 
         foreach(var movie in movies){
-            Random random = new Random();
-            int x = random.Next(0, 10);
-            int y = random.Next(0, 10);
+            try{
+             var newRequest = new HttpRequestMessage(HttpMethod.Get, $"https://localhost:7194/api/User/awards/{movie.id}");
+            var newResponse = await client.SendAsync(newRequest);
+            
+            if(newResponse.IsSuccessStatusCode){
+            var newResponseContent = await newResponse.Content.ReadAsStringAsync();
+            Nom rez=JsonSerializer.Deserialize<Nom>(newResponseContent);
 
-            movie.nomination=x;
-            movie.award=y;
+            movie.nomination=rez.numberOfNominations;
+            movie.award=rez.numberOfWins;
+            }
+            }catch(Exception ex){
+                Console.WriteLine(ex.ToString());
+            }
 
         }
         
@@ -262,6 +270,11 @@
         public string? Name { get; set; }
         public string? Summary { get; set; }
         public string? PhotoUrl { get; set; }
+    }
+    public class Nom
+    {
+        public int numberOfNominations {get; set;}
+        public int numberOfWins {get; set;}
     }
 
 }
