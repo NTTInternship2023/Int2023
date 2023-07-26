@@ -69,12 +69,12 @@
     padding: 10px;
     border: 1px solid #ccc;
     width: 300px;
+    height: 500px;
     text-align: center;
 }
 
 .hashtag-image {
     width: 100%;
-    height: auto;
     max-width: 200px; /* Adjust the maximum width as desired */
 }
 .popup-button {
@@ -156,4 +156,51 @@
 
 li {
     display: table;
+}
+
+container {
+    position: relative;
+    display: inline-block;
+    text-align: left; /* Aliniază conținutul la stânga */
+    margin-right: -10px; /* Adaugă o margine de 1px la dreapta */
+}
+
+.image {
+    width: 50px; /* Ajustează dimensiunea imaginii aici */
+    display: block;
+}
+
+.image-container {
+    display: flex;
+    align-items: center;
+    margin-right: 30px; /* Ajustează spațiul dintre cele două imagini */
+    margin-left:-20px;
+    height: 60%;
+    max-height: 60%;
+}
+
+.number_nomination {
+    position: relative;
+    top: -5.3vh; /* Ajustează poziția verticală a numărului */
+    left: 0px; /* Ajustează poziția orizontală a numărului */
+    font-size: 24px; /* Ajustează dimensiunea fontului pentru număr */
+    color: rgb(255, 255, 255); /* Ajustează culoarea textului pentru număr */
+    padding: 5px 10px; /* Ajustează padding-ul pentru număr */
+    border-radius: 5px; /* Ajustează colțurile rotunjite pentru număr */
+}
+
+.number_award {
+    position: relative;
+    top: -5.3vh; /* Ajustează poziția verticală a numărului */
+    left: 0px; /* Ajustează poziția orizontală a numărului */
+    font-size: 24px; /* Ajustează dimensiunea fontului pentru număr */
+    color: rgb(255, 255, 255); /* Ajustează culoarea textului pentru număr */
+    padding: 5px 10px; /* Ajustează padding-ul pentru număr */
+    border-radius: 5px;
+}
+
+
+.movie-info {
+    display: flex;
+    flex-direction: column;
 }

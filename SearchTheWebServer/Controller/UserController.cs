@@ -25,7 +25,7 @@ namespace SearchTheWebServer.Controller
         }
 
         [HttpPost("register")]
-        public async Task<ActionResult<User>> Register(RegisterUserDto userDto)
+        public async Task<ActionResult<User>> Register([FromBody]RegisterUserDto userDto)
         {
             try
             {
@@ -53,7 +53,7 @@ namespace SearchTheWebServer.Controller
                 _context.Users.Add(newUser);
                 await _context.SaveChangesAsync();
 
-                return Ok($"New user created!Welcome, {newUser.Username}!");
+                return Ok($"New user created! Welcome, {newUser.Username}!");
             }
             catch (Exception ex)
             {
@@ -62,27 +62,37 @@ namespace SearchTheWebServer.Controller
         }
 
         [HttpPost("login")]
-        public async Task<ActionResult<string>> Login(LoginUserDto userDto)
+        public async Task<ActionResult<LoginStatus>> Login([FromBody]LoginUserDto userDto)
         {
+            LoginStatus loginStatus = new LoginStatus();
             try
             {
                 var existingUser = await _context.Users.FirstOrDefaultAsync(u => u.Username == userDto.Username);
 
                 if (existingUser == null)
                 {
-                    return ("Username unregister, please register");
+                    loginStatus.Status= false;
+                    loginStatus.Message= "Username unregistered, please register";
+                    return loginStatus;
                 }
 
                 else if (!VerifyPasswordHash(userDto.Password, existingUser.PasswordHash, existingUser.PasswordSalt))
                 {
-                    return ("Wrong password");
+                    loginStatus.Status= false;
+                    loginStatus.Message= "Wrong password";
+                    return loginStatus;
                 }
-
-                return ("Succesful Login");
+                loginStatus.Id = existingUser.Id;
+                loginStatus.Username = existingUser.Username;
+                loginStatus.Status= true;
+                loginStatus.Message= "Succesful Login";
+                return loginStatus;
+                
             }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Error logging in: {ex.Message}");
+            catch (Exception ex) {
+                loginStatus.Status= false;
+                loginStatus.Message= $"Error logging in: {ex}";
+                return loginStatus;
             }
         }
         [HttpPost("changepassword")]
@@ -266,9 +276,9 @@ namespace SearchTheWebServer.Controller
             //Validating input
             FilterParametersValidator validator = new FilterParametersValidator();
            if (filterDTO.sort != null && !validator.IsValidSort(filterDTO.sort))
-{
-    return Conflict("Sort parameter is Invalid, only incr or decr available");
-}
+            {
+                return Conflict("Sort parameter is Invalid, only incr or decr available");
+            }
 
             if (!(validator.IsValidYear(filterDTO.EndYear) && validator.IsValidYear(filterDTO.StartYear)))
             {

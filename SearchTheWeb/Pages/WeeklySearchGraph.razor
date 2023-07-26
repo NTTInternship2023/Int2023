@@ -3,6 +3,8 @@
 @using ChartJs.Blazor.BarChart
 @using ChartJs.Blazor.Common
 @using System.Text.Json
+@using ChartJs.Blazor.BarChart.Axes
+@using ChartJs.Blazor.Common.Axes
 
 @inject HttpClient HttpClient
 
@@ -46,6 +48,7 @@ else
     static readonly CultureInfo _ci = CultureInfo.CurrentCulture;
     readonly int _currentWeekNumber = _ci.Calendar.GetWeekOfYear(DateTime.Now, CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday);
     
+
     bool _isLoading = true;
     private readonly BarConfig _barConfig = new();
 
@@ -68,7 +71,7 @@ else
     private async Task GetData()
     {
         //Get all data from Endpoint
-        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7194/Logger/SearchAction?limit=10");
+        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7194/Logger/SearchAction");
         var response = await HttpClient.SendAsync(request);
         if (response.IsSuccessStatusCode)
         {
@@ -77,8 +80,8 @@ else
             _searchDatas = searchDatas!;
         }
 
-    //Get Current Week Data
         _searchDatas = _searchDatas.Where(x => x.weekNumber == _currentWeekNumber).ToList();
+        _searchDatas = _searchDatas.Take(10).ToList();
     }
 
     private void ConfigureBarConfig()
@@ -90,6 +93,23 @@ else
             {
                 Display = true,
                 Text = $"Current week's most searched movies ({CurrentWeekStartDate.ToShortDateString()} - {CurrentWeekEndDate.ToShortDateString()})"
+            },
+            Scales = new BarScales
+            {
+                XAxes = new List<CartesianAxis>
+                {
+                    new BarCategoryAxis
+                    {
+                        Stacked = true
+                    }
+                },
+                YAxes = new List<CartesianAxis>
+                {
+                    new BarLinearCartesianAxis
+                    {
+                        Stacked = true
+                    }
+                }
             }
         };
 
