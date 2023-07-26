@@ -13,7 +13,7 @@ namespace SearchTheWebServer.Controller
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class UserController : ControllerBase
+    public partial class UserController : ControllerBase
     {
         private string ApiKey { get; } = "c3eb1fafacmshc5fd818a156e962p1af460jsnc0f24ca50442";
         private string ApiHost { get; } = "moviesdatabase.p.rapidapi.com";
@@ -23,6 +23,7 @@ namespace SearchTheWebServer.Controller
         {
             _context = context;
         }
+
 
         [HttpPost("register")]
         public async Task<ActionResult<User>> Register([FromBody]RegisterUserDto userDto)
@@ -370,9 +371,66 @@ else
 
 
 
+
              
             }
 
         }
+
+        /*
+ * Function to get movie's award details from the API. It makes a GET request to the API and returns the award details.
+ * Parameters: string titleId
+ * Returns: AwardDetails
+ */
+private async Task<AwardDetailsDto> GetMovieAwardDetails(string titleId)
+{
+    AwardDetailsDto awardDetails = new AwardDetailsDto();
+    var client = new HttpClient();
+    var request = new HttpRequestMessage
+    {
+        Method = HttpMethod.Get,
+        RequestUri = new Uri($"https://moviesdatabase.p.rapidapi.com/titles/{titleId}?info=awards"),
+        Headers =
+        {
+            { "X-RapidAPI-Key", ApiKey },
+            { "X-RapidAPI-Host", ApiHost }
+        }
+    };
+
+    using (var response = await client.SendAsync(request))
+    {
+        response.EnsureSuccessStatusCode();
+        var body = await response.Content.ReadAsStringAsync();
+        var document = JsonDocument.Parse(body);
+        
+        var root = document.RootElement.GetProperty("results");
+
+        awardDetails.NumberOfNominations = root.GetProperty("nominations").GetProperty("total").GetInt32();
+        awardDetails.NumberOfWins = root.GetProperty("wins").GetProperty("total").GetInt32();
+    }
+    
+
+    return awardDetails;
+}
+
+/*
+ * HTTP Endpoint to get movie's award details from the API.
+ * Parameters: string titleId
+ * Returns: AwardDetails
+ */
+[HttpGet("awards/{titleId}")]
+public async Task<ActionResult<AwardDetailsDto>> GetAwards(string titleId)
+{
+    try
+    {
+        var awardDetails = await GetMovieAwardDetails(titleId);
+        return Ok(awardDetails);
+    }
+    catch (Exception ex)
+    {
+        return StatusCode(500, $"Error getting award details: {ex.Message}");
+    }
+}
+
     }
 }
