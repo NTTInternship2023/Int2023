@@ -261,7 +261,6 @@ namespace SearchTheWebServer.Controller
         [HttpPost("Filter")]
         public async Task<ActionResult<List<MovieDto>>> FilterMovies([FromBody]FilterDTO filterDTO)
         {
-            
             //Request to the API
             var client = new HttpClient();
             var request = new HttpRequestMessage(HttpMethod.Get,
@@ -311,6 +310,9 @@ namespace SearchTheWebServer.Controller
                     var titleString = element.GetProperty("titleText").GetProperty("text").ToString();
                     var imageElement = element.GetProperty("primaryImage");
                     var idString = element.GetProperty("id").ToString();
+
+                    HttpResponseMessage regionsResult;
+                    
                     double rating=0;
 
                     var imageString = imageElement.ValueKind == JsonValueKind.Null
@@ -320,10 +322,25 @@ namespace SearchTheWebServer.Controller
 
                     var ratingElement = await GetMovieRating(idString);
 
+                    // RETURN ENG TITLE IF NULL
+                    var regionalTitles = await GetRegionalTitles(idString);
+                    if (regionalTitles != null)
+                    {
+                        foreach(var title in regionalTitles)
+                        {
+                            Console.WriteLine($"Before Replace: {title.Key} | {title.Value}");
+                            if (title.Value == null){
+                                regionalTitles[title.Key] = titleString;
+                            }
+                            Console.WriteLine($"{title.Key} | {title.Value}");
+                        }
+                    } else return Conflict("No response from region");
+                    
                     movieDtos.Add(new MovieDto
                     {
                         Id = idString,
                         Title = titleString,
+                        RegionalTitles = regionalTitles,
                         ImageUrl = imageString,
                         ReleaseYear = releaseYear,
                         Rating = ratingElement.Item1,
@@ -418,19 +435,57 @@ private async Task<AwardDetailsDto> GetMovieAwardDetails(string titleId)
  * Parameters: string titleId
  * Returns: AwardDetails
  */
-[HttpGet("awards/{titleId}")]
-public async Task<ActionResult<AwardDetailsDto>> GetAwards(string titleId)
-{
-    try
-    {
-        var awardDetails = await GetMovieAwardDetails(titleId);
-        return Ok(awardDetails);
-    }
-    catch (Exception ex)
-    {
-        return StatusCode(500, $"Error getting award details: {ex.Message}");
-    }
-}
+        [HttpGet("awards/{titleId}")]
+        public async Task<ActionResult<AwardDetailsDto>> GetAwards(string titleId)
+        {
+            try
+            {
+                var awardDetails = await GetMovieAwardDetails(titleId);
+                return Ok(awardDetails);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error getting award details: {ex.Message}");
+            }
+        }
+
+        [HttpGet]
+        private async Task<Dictionary<string,string?>> GetRegionalTitles(string id)
+        {
+            Dictionary<string, string?> movieDictionary = new() {
+                {"US", null},
+                {"ES", null},
+                {"DE", null},
+                {"RO", null},
+            };
+
+            var client = new HttpClient();
+            var request = new HttpRequestMessage(HttpMethod.Get,
+                $"https://moviesdatabase.p.rapidapi.com/titles/{id}/aka");
+            request.Headers.Add("X-RapidAPI-Host", ApiHost);
+            request.Headers.Add("X-RapidAPI-Key", ApiKey);
+
+            using (var response = await client.SendAsync(request))
+            {
+                response.EnsureSuccessStatusCode();
+                var body = await response.Content.ReadAsStringAsync();
+
+                var document = JsonDocument.Parse(body);
+                var root = document.RootElement;
+                var results = root.GetProperty("results");
+                var resultList = results.EnumerateArray().ToList();
+
+                foreach (var result in resultList)
+                {
+                    var foundRegion = result.GetProperty("region").ToString();
+                    if (movieDictionary.ContainsKey(foundRegion)){
+                        var titleString = result.GetProperty("title").ToString();
+                        movieDictionary[foundRegion] = titleString;
+                    }
+                }
+            }
+            return movieDictionary;
+        }
 
     }
 }
