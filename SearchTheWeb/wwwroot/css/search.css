@@ -117,37 +117,27 @@
         transition: opacity 0.3s;
     }
 
-.container {
-    position: relative;
-    display: inline-block;
-    text-align: left; /* Aliniază conținutul la stânga */
-    margin-right: -10px; /* Adaugă o margine de 1px la dreapta */
-}
+        .stars .tooltiptext::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: #555 transparent transparent transparent;
+        }
 
-.image {
-    width: 50px; /* Ajustează dimensiunea imaginii aici */
-    display: block;
-}
+    .stars:hover .tooltiptext {
+        visibility: visible;
+        opacity: 1;
+    }
 
-.number_nomination {
-    position: absolute;
-    top: -5px; /* Ajustează poziția verticală a numărului */
-    left: 20px; /* Ajustează poziția orizontală a numărului */
-    font-size: 24px; /* Ajustează dimensiunea fontului pentru număr */
-    color: white; /* Ajustează culoarea textului pentru număr */
-    padding: 5px 10px; /* Ajustează padding-ul pentru număr */
-    border-radius: 5px; /* Ajustează colțurile rotunjite pentru număr */
-}
-
-.number_award {
-    position: absolute;
-    top: 45px; /* Ajustează poziția verticală a numărului */
-    left: 20px; /* Ajustează poziția orizontală a numărului */
-    font-size: 24px; /* Ajustează dimensiunea fontului pentru număr */
-    color: white; /* Ajustează culoarea textului pentru număr */
-    padding: 5px 10px; /* Ajustează padding-ul pentru număr */
-    border-radius: 5px;
-}
+    .stars:before {
+        content: "\2606\2606\2606\2606\2606";
+        float: left;
+        z-index: 1;
+    }
 
     .stars .percent {
         position: absolute;
@@ -159,14 +149,6 @@
         padding-left: 75px;
     }
 
-.image-container {
-    display: flex;
-    align-items: center;
-    margin-right: 30px; /* Ajustează spațiul dintre cele două imagini */
-    margin-left:-20px;
-    height: 70%;
-}
-
         .stars .percent:after {
             content: "\2605\2605\2605\2605\2605";
             color: rgb(255, 200, 0);
@@ -175,10 +157,49 @@
 li {
     display: table;
 }
-.movie-info {
-    display: flex;
-    flex-direction: column;
+
+container {
+    position: relative;
+    display: inline-block;
+    text-align: left; /* Aliniază conținutul la stânga */
+    margin-right: -10px; /* Adaugă o margine de 1px la dreapta */
 }
+
+.image {
+    width: 50px; /* Ajustează dimensiunea imaginii aici */
+    display: block;
+}
+
+.image-container {
+    display: flex;
+    align-items: center;
+    margin-right: 30px; /* Ajustează spațiul dintre cele două imagini */
+    margin-left:-20px;
+    height: 60%;
+    max-height: 60%;
+}
+
+.number_nomination {
+    position: relative;
+    top: -5.3vh; /* Ajustează poziția verticală a numărului */
+    left: 0px; /* Ajustează poziția orizontală a numărului */
+    font-size: 24px; /* Ajustează dimensiunea fontului pentru număr */
+    color: rgb(255, 255, 255); /* Ajustează culoarea textului pentru număr */
+    padding: 5px 10px; /* Ajustează padding-ul pentru număr */
+    border-radius: 5px; /* Ajustează colțurile rotunjite pentru număr */
+}
+
+.number_award {
+    position: relative;
+    top: -5.3vh; /* Ajustează poziția verticală a numărului */
+    left: 0px; /* Ajustează poziția orizontală a numărului */
+    font-size: 24px; /* Ajustează dimensiunea fontului pentru număr */
+    color: rgb(255, 255, 255); /* Ajustează culoarea textului pentru număr */
+    padding: 5px 10px; /* Ajustează padding-ul pentru număr */
+    border-radius: 5px;
+}
+
+
 .movie-info {
     display: flex;
     flex-direction: column;

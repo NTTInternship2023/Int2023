@@ -89,14 +89,15 @@
                             <span class="number_award">@movie.award</span>
                         </div>
                         <img src="@movie.imageUrl" alt="Hashtag Photo" class="hashtag-image" />
+                        
                     </div>
                     <div class="movie-info">
                         <h3>@movie.title</h3>
-                    <p>Release year: @movie.releaseYear</p>
-                    <p>  <div class="stars"><span class="tooltiptext">@movie.numVotes votes</span><div class="percent" style="width:@ReturnStarRating(movie.rating);"></div></div></p>
-          
+                        <p>Release year: @movie.releaseYear</p>
+                        <p>  <div class="stars"><span class="tooltiptext">@movie.numVotes votes</span><div class="percent" style="width:@ReturnStarRating(movie.rating);"></div></div></p>
+                        </div>
                     </div>
-                    </div>
+           
             }
         </div>
     }
@@ -213,8 +214,6 @@
         else{
             Console.WriteLine("Error");
         }
-
-
     }
 
     private async Task LogOut()
@@ -232,14 +231,18 @@
     {
         showUserPopup = false;
     }
-
     
-    public class SearchTerm
+    public string ReturnStarRating(double? rating)
     {
-        public DateTime Date { get; set; }
-        public string? Name { get; set; }
-        public string? Summary { get; set; }
-        public string? PhotoUrl { get; set; }
+        string starRating = "0%";
+        if(rating!=null)
+        {
+            rating *= 10;
+            starRating = rating.ToString() + "%";
+        }
+       
+        return starRating;
+
     }
 
     public class Movie
@@ -253,17 +256,13 @@
         public int? award=0;
         public int numVotes { get; set; }
     }
-    public string ReturnStarRating(double? rating)
+    public class SearchTerm
     {
-        string starRating = "0%";
-        if(rating!=null)
-        {
-            rating *= 10;
-            starRating = rating.ToString() + "%";
-        }
-       
-        return starRating;
-
+        public DateTime Date { get; set; }
+        public string? Name { get; set; }
+        public string? Summary { get; set; }
+        public string? PhotoUrl { get; set; }
     }
+
 }
 
