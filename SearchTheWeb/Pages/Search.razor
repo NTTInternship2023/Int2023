@@ -38,14 +38,17 @@
     <div class="search-bar">
         <input id="searchBox" type="text" list="txtsearch" @oninput="@UpdateSearchTermString" placeholder="Enter your search term"/>
         <datalist id="txtsearch">
-            @if(lista!=null)
-            @foreach(var item in lista){
-                <option>@item</option>
+            @if (lista != null)
+            {
+                foreach(var item in lista){
+                    <option>@item</option>
+                }    
             }
+            
         </datalist>
         <br> -Start Year-
         <input type="text" class="form-control search-input" id="StartYear" @bind="@StartYear" placeholder="Start Year" />
-         -End Year-
+        -End Year-
         <input type="text" class="form-control search-input" id="endYear" @bind="@EndYear" />
         -Sortare-
         <select class="form-control search-input" @bind="@Sort">
@@ -53,13 +56,24 @@
             <option>decr</option>
         </select>
         -Tipul-
-       <select class="form-control search-input" @bind="@TitleType">
+        <select class="form-control search-input" @bind="@TitleType">
             <option value="movie,tvSeries">All</option>
             <option value="movie">movie</option>
             <option value="tvSeries">tvSeries</option>
         </select>
-        
     </div>
+    <div class="nav-item px-3">
+        <div class="form-group">
+            <label class="nav-link language-label" for="languageSelect">Select Language:</label>
+            <select @bind="@currentLanguage" class="form-control" id="languageSelect">
+                @foreach (var language in languages)
+                {
+                    <option value="@language.Key">@language.Value</option>
+                }
+            </select>
+        </div>
+    </div>
+    <br/>   
     <button type="button" class="btn btn-primary search-button" @onclick="PerformSearch">Search</button>
 </form>
 
@@ -92,7 +106,7 @@
                         
                     </div>
                     <div class="movie-info">
-                        <h3>@movie.title</h3>
+                        <h3>@movie.regionalTitle[currentLanguage]</h3>
                         <p>Release year: @movie.releaseYear</p>
                         <p>  <div class="stars"><span class="tooltiptext">@movie.numVotes votes</span><div class="percent" style="width:@ReturnStarRating(movie.rating);"></div></div></p>
                         </div>
@@ -123,6 +137,22 @@
             searchTerm=value;
         }
     }}
+    
+    
+    
+    private string currentLanguage = "EN";
+    private Dictionary<string, string> languages = new Dictionary<string, string>()
+    {
+        { "EN", "English" },
+        { "RO", "Romana" },
+        { "DE", "Deutsch" },
+        { "ES", "Espanol" }
+    };
+    
+    
+    
+    
+    
     private int StartYear;
     private string? Sort;
     private string? TitleType;
@@ -140,7 +170,7 @@
         movies=new List<Movie>();
         localId = await _localstorage.GetItemAsync<int?>("id")??20;
         currentUser = await _localstorage.GetItemAsync<string>("username");
-            Console.WriteLine(localId);
+        Console.WriteLine(localId);
     }
 
     private async Task GetSearchSuggestions(string? searchTerm = null)
@@ -207,8 +237,14 @@
             movie.nomination=x;
             movie.award=y;
 
+
+            movie.regionalTitle = new();
+            //TODO: delete mock data
+            movie.regionalTitle["RO"]="Titlu RO";
+            movie.regionalTitle["EN"]=movie.title;
+            movie.regionalTitle["DE"]="Titlu DE";
+            movie.regionalTitle["ES"]="Titlu ES";
         }
-        
             StateHasChanged();
         }
         else{
@@ -255,6 +291,7 @@
         public int? nomination=0;
         public int? award=0;
         public int numVotes { get; set; }
+        public Dictionary<string, string?>? regionalTitle { get; set; }
     }
     public class SearchTerm
     {
