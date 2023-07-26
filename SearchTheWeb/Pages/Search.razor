@@ -244,5 +244,25 @@
         return starRating;
 
     }
+
+    public class Movie
+    {
+        public string? id{get; set;}
+        public string? title{get;set;}
+        public string? imageUrl { get; set; }
+        public int releaseYear { get; set; }
+        public double rating { get; set; }
+        public int? nomination=0;
+        public int? award=0;
+        public int numVotes { get; set; }
+    }
+    public class SearchTerm
+    {
+        public DateTime Date { get; set; }
+        public string? Name { get; set; }
+        public string? Summary { get; set; }
+        public string? PhotoUrl { get; set; }
+    }
+
 }
 
