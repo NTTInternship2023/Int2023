@@ -175,25 +175,26 @@ container {
     align-items: center;
     margin-right: 30px; /* Ajustează spațiul dintre cele două imagini */
     margin-left:-20px;
-    height: 70%;
+    height: 60%;
+    max-height: 60%;
 }
 
 .number_nomination {
-    position: absolute;
-    top: -5px; /* Ajustează poziția verticală a numărului */
-    left: 20px; /* Ajustează poziția orizontală a numărului */
+    position: relative;
+    top: -5.3vh; /* Ajustează poziția verticală a numărului */
+    left: 0px; /* Ajustează poziția orizontală a numărului */
     font-size: 24px; /* Ajustează dimensiunea fontului pentru număr */
-    color: white; /* Ajustează culoarea textului pentru număr */
+    color: rgb(255, 255, 255); /* Ajustează culoarea textului pentru număr */
     padding: 5px 10px; /* Ajustează padding-ul pentru număr */
     border-radius: 5px; /* Ajustează colțurile rotunjite pentru număr */
 }
 
 .number_award {
-    position: absolute;
-    top: 45px; /* Ajustează poziția verticală a numărului */
-    left: 20px; /* Ajustează poziția orizontală a numărului */
+    position: relative;
+    top: -5.3vh; /* Ajustează poziția verticală a numărului */
+    left: 0px; /* Ajustează poziția orizontală a numărului */
     font-size: 24px; /* Ajustează dimensiunea fontului pentru număr */
-    color: white; /* Ajustează culoarea textului pentru număr */
+    color: rgb(255, 255, 255); /* Ajustează culoarea textului pentru număr */
     padding: 5px 10px; /* Ajustează padding-ul pentru număr */
     border-radius: 5px;
 }
