@@ -128,7 +128,7 @@
     private int EndYear=2024;
     private string currentUser = "N/A";
     private bool showUserPopup = false;
-    private int localId;
+    private int? localId;// for testing purposes
 
     protected override async Task OnInitializedAsync()
     {
@@ -137,7 +137,7 @@
         hashtags = allHashtags;
         lista = new List<string>();
         movies=new List<Movie>();
-        localId = await _localstorage.GetItemAsync<int>("id");
+        localId = await _localstorage.GetItemAsync<int?>("id")??20;
         currentUser = await _localstorage.GetItemAsync<string>("username");
             Console.WriteLine(localId);
     }
@@ -146,8 +146,6 @@
     { 
         try
         {
-            var httpClient = new HttpClient();
-
             if (!string.IsNullOrEmpty(searchTerm))
             {
             using(var httpClient = new HttpClient())
