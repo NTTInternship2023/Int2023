@@ -97,7 +97,8 @@
                         <p>  <div class="stars"><span class="tooltiptext">@movie.numVotes votes</span><div class="percent" style="width:@ReturnStarRating(movie.rating);"></div></div></p>
                         </div>
                     </div>
-           
+                </div>
+
             }
         </div>
     }
@@ -143,6 +144,7 @@
             Console.WriteLine(localId);
     }
 
+
     private async Task GetSearchSuggestions(string? searchTerm = null)
     { 
         try
@@ -165,7 +167,6 @@
                 StateHasChanged();
             }
         }
-
 
         }
         catch (Exception ex)
@@ -199,6 +200,7 @@
 
             movies=JsonSerializer.Deserialize<List<Movie>>(responseContent);
 
+
         foreach(var movie in movies){
             Random random = new Random();
             int x = random.Next(0, 10);
@@ -214,6 +216,7 @@
         else{
             Console.WriteLine("Error");
         }
+
     }
 
     private async Task LogOut()
@@ -256,6 +259,7 @@
         public int? award=0;
         public int numVotes { get; set; }
     }
+      
     public class SearchTerm
     {
         public DateTime Date { get; set; }
