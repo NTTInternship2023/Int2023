@@ -67,8 +67,8 @@
             <label class="nav-link language-label" for="languageSelect">Select Language:</label>
             <select @bind="@currentLanguage" class="form-control" id="languageSelect">
                 @foreach (var language in languages)
-                {
-                    <option value="@language.Key">@language.Value</option>
+                {   
+                    <option value="@language.Key" >@language.Value </option>
                 }
             </select>
         </div>
@@ -106,12 +106,11 @@
                         
                     </div>
                     <div class="movie-info">
-                        <h3>@movie.regionalTitle[currentLanguage]</h3>
+                        <h3>@movie.regionalTitles[currentLanguage]</h3>
                         <p>Release year: @movie.releaseYear</p>
                         <p>  <div class="stars"><span class="tooltiptext">@movie.numVotes votes</span><div class="percent" style="width:@ReturnStarRating(movie.rating);"></div></div></p>
                         </div>
                     </div>
-           
             }
         </div>
     }
@@ -140,16 +139,22 @@
     
     
     
-    private string currentLanguage = "EN";
+    private string currentLanguage = "US";
     private Dictionary<string, string> languages = new Dictionary<string, string>()
     {
-        { "EN", "English" },
+        { "US", "English" },
         { "RO", "Romana" },
         { "DE", "Deutsch" },
         { "ES", "Espanol" }
     };
     
-    
+    private Dictionary<string, string> languageIcons = new Dictionary<string, string>()
+    {
+        { "US", "images/united-states.png" },
+        { "RO", "images/romania.png" },
+        { "DE", "images/germany.png" },
+        { "ES", "images/spain.png" }
+    };
     
     
     
@@ -226,12 +231,17 @@
 
 
         HttpResponseMessage response = await client.PostAsync("https://localho.st:7194/api/User/Filter", content);
-
+        
         if(response.IsSuccessStatusCode){
             var responseContent = await response.Content.ReadAsStringAsync();
 
             movies=JsonSerializer.Deserialize<List<Movie>>(responseContent);
-
+            
+            //Set movies regional titles in US to title
+            foreach(var movie in movies){
+                movie.regionalTitles["US"]=movie.title;
+            }
+            
         foreach(var movie in movies){
             try{
              var newRequest = new HttpRequestMessage(HttpMethod.Get, $"https://localhost:7194/api/User/awards/{movie.id}");
@@ -247,14 +257,6 @@
             }catch(Exception ex){
                 Console.WriteLine(ex.ToString());
             }
-
-
-            movie.regionalTitle = new();
-            //TODO: delete mock data
-            movie.regionalTitle["RO"]="Titlu RO";
-            movie.regionalTitle["EN"]=movie.title;
-            movie.regionalTitle["DE"]="Titlu DE";
-            movie.regionalTitle["ES"]="Titlu ES";
         }
             StateHasChanged();
         }
@@ -280,6 +282,7 @@
     }
     
     public string ReturnStarRating(double? rating)
+
     {
         string starRating = "0%";
         if(rating!=null)
@@ -302,7 +305,7 @@
         public int? nomination=0;
         public int? award=0;
         public int numVotes { get; set; }
-        public Dictionary<string, string?>? regionalTitle { get; set; }
+        public Dictionary<string, string?>? regionalTitles { get; set; }
     }
     public class SearchTerm
     {
