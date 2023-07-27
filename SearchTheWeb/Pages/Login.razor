@@ -19,7 +19,6 @@
     <link rel="stylesheet" href="css/Login.css" />
 </head>
 
-
 <div class="container">
     <h1>LOGIN</h1>
     <div class="box">
@@ -101,7 +100,7 @@
     protected override async Task OnInitializedAsync()
     {
         localId = await _localstorage.GetItemAsync<int>("id");
-        if (localId != 0 || localId != null){
+        if (localId != null && localId==20){
             NavigationManager.NavigateTo("../search", forceLoad:true);
         }
     }
