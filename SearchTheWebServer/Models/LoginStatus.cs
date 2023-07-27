@@ -11,5 +11,6 @@ namespace SearchTheWebServer.Models
         public string Username { get; set;} = "";
         public string Message{ get; set;}="";
         public bool Status { get; set; }=false;
+        public bool IsAdmin { get; set; }=false;
     }
 }
