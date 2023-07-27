@@ -448,7 +448,7 @@ private async Task<AwardDetailsDto> GetMovieAwardDetails(string titleId)
             var client = new HttpClient();
             var request = new HttpRequestMessage(HttpMethod.Get,
                 $"https://moviesdatabase.p.rapidapi.com/titles/{id}/aka");
-                request.Headers.Add("X-RapidAPI-Host", "509bfe4d46msh8bdf8fc04feb77ap1cc63bjsn910919245f2e");
+                request.Headers.Add("X-RapidAPI-Host", ApiHost);
                 request.Headers.Add("X-RapidAPI-Key", ApiKey);
 
             using (var response = await client.SendAsync(request))
