@@ -86,6 +86,7 @@ namespace SearchTheWebServer.Controller
                 loginStatus.Id = existingUser.Id;
                 loginStatus.Username = existingUser.Username;
                 loginStatus.Status= true;
+                loginStatus.IsAdmin= existingUser.IsAdmin;
                 loginStatus.Message= "Succesful Login";
                 return loginStatus;
                 
