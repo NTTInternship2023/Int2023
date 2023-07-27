@@ -69,7 +69,7 @@ namespace SearchTheWebServer.Controller
             try
             {
                 var existingUser = await _context.Users.FirstOrDefaultAsync(u => u.Username == userDto.Username);
-
+                
                 if (existingUser == null)
                 {
                     loginStatus.Status= false;
@@ -322,19 +322,16 @@ namespace SearchTheWebServer.Controller
 
                     var ratingElement = await GetMovieRating(idString);
 
-                    // RETURN ENG TITLE IF NULL
                     var regionalTitles = await GetRegionalTitles(idString);
                     if (regionalTitles != null)
                     {
                         foreach(var title in regionalTitles)
                         {
-                            Console.WriteLine($"Before Replace: {title.Key} | {title.Value}");
                             if (title.Value == null){
                                 regionalTitles[title.Key] = titleString;
                             }
-                            Console.WriteLine($"{title.Key} | {title.Value}");
                         }
-                    } else return Conflict("No response from region");
+                    }
                     
                     movieDtos.Add(new MovieDto
                     {
@@ -361,35 +358,23 @@ namespace SearchTheWebServer.Controller
                     movieDtos = movieDtos.FindAll(m => (m.ReleaseYear <= filterDTO.EndYear  && m.ReleaseYear >= filterDTO.StartYear));
                 }
           
-var searchLog = new SearchLog
-{
-    IdUser = filterDTO?.IdUser ?? default,
-    Date = DateTime.Now,
-    Action = "search",
-    ActionDetail = filterDTO?.Title ?? string.Empty
-};
-
-
-
-
-
+                var searchLog = new SearchLog
+                {
+                    IdUser = filterDTO?.IdUser ?? default,
+                    Date = DateTime.Now,
+                    Action = "search",
+                    ActionDetail = filterDTO?.Title ?? string.Empty
+                };
                 _context.SearchLogs.Add(searchLog);
                 await _context.SaveChangesAsync();
-if (string.Equals(filterDTO?.sort, "incr", StringComparison.OrdinalIgnoreCase))
-{
-    return Ok(movieDtos.OrderBy(m => m.ReleaseYear));
-}
-else
-{
-    return Ok(movieDtos.OrderByDescending(m => m.ReleaseYear));
-}
-
-
-
-
-
-
-             
+                if (string.Equals(filterDTO?.sort, "incr", StringComparison.OrdinalIgnoreCase))
+                {
+                    return Ok(movieDtos.OrderBy(m => m.ReleaseYear));
+                }
+                else
+                {
+                    return Ok(movieDtos.OrderByDescending(m => m.ReleaseYear));
+                }
             }
 
         }
@@ -462,8 +447,8 @@ private async Task<AwardDetailsDto> GetMovieAwardDetails(string titleId)
             var client = new HttpClient();
             var request = new HttpRequestMessage(HttpMethod.Get,
                 $"https://moviesdatabase.p.rapidapi.com/titles/{id}/aka");
-            request.Headers.Add("X-RapidAPI-Host", ApiHost);
-            request.Headers.Add("X-RapidAPI-Key", ApiKey);
+                request.Headers.Add("X-RapidAPI-Host", "509bfe4d46msh8bdf8fc04feb77ap1cc63bjsn910919245f2e");
+                request.Headers.Add("X-RapidAPI-Key", ApiKey);
 
             using (var response = await client.SendAsync(request))
             {

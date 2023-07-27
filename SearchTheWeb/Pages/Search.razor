@@ -20,7 +20,7 @@
         {
             <div class="user-popup">
                 <button class="popup-button" @onclick="LogOut">Log out</button>
-                <button class="popup-button" @onclick="CloseUserPopup">Change Password</button>
+                <button class="popup-button" @onclick="ChangePassword">Change Password</button>
             </div>
             <div class="popup-overlay" @onclick="CloseUserPopup"></div>
         }
@@ -142,7 +142,10 @@
         currentUser = await _localstorage.GetItemAsync<string>("username");
             Console.WriteLine(localId);
     }
-
+    private void ChangePassword(){
+        if (!string.IsNullOrEmpty(currentUser))
+            NavigationManager.NavigateTo("../change_password", forceLoad:true );
+    }
     private async Task GetSearchSuggestions(string? searchTerm = null)
     { 
         try
