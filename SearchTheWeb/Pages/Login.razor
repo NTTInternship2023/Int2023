@@ -166,8 +166,9 @@
         {
             await _localstorage.SetItemAsync("id", loginStatus.id);
             await _localstorage.SetItemAsync("username", loginStatus.username);
+            await _localstorage.SetItemAsync("isAdmin", loginStatus.isAdmin);
             setWarning(true, loginStatus.message);
-            NavigationManager.NavigateTo("../search", forceLoad:true);
+            NavigationManager.NavigateTo("/search", forceLoad:true);
         }
         else
             setWarning(true, loginStatus.message);
