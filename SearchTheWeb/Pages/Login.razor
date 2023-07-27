@@ -80,6 +80,8 @@
 @code
 {
 //VARIABILE SETATE
+    int? localId;
+
     string Username = string.Empty;
     string Password = string.Empty;
 
@@ -95,6 +97,14 @@
 
     LoginStatus loginStatus = new();
     RegisterStatus registerStatus = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        localId = await _localstorage.GetItemAsync<int>("id");
+        if (localId != 0 || localId != null){
+            NavigationManager.NavigateTo("../search", forceLoad:true);
+        }
+    }
 
 //REGISTER/WARNING POPUP
     void setPopup(bool state)

@@ -69,7 +69,7 @@ namespace SearchTheWebServer.Controller
             try
             {
                 var existingUser = await _context.Users.FirstOrDefaultAsync(u => u.Username == userDto.Username);
-
+                
                 if (existingUser == null)
                 {
                     loginStatus.Status= false;
@@ -261,7 +261,6 @@ namespace SearchTheWebServer.Controller
         [HttpPost("Filter")]
         public async Task<ActionResult<List<MovieDto>>> FilterMovies([FromBody]FilterDTO filterDTO)
         {
-            
             //Request to the API
             var client = new HttpClient();
             var request = new HttpRequestMessage(HttpMethod.Get,
@@ -311,6 +310,9 @@ namespace SearchTheWebServer.Controller
                     var titleString = element.GetProperty("titleText").GetProperty("text").ToString();
                     var imageElement = element.GetProperty("primaryImage");
                     var idString = element.GetProperty("id").ToString();
+
+                    HttpResponseMessage regionsResult;
+                    
                     double rating=0;
 
                     var imageString = imageElement.ValueKind == JsonValueKind.Null
@@ -320,10 +322,22 @@ namespace SearchTheWebServer.Controller
 
                     var ratingElement = await GetMovieRating(idString);
 
+                    var regionalTitles = await GetRegionalTitles(idString);
+                    if (regionalTitles != null)
+                    {
+                        foreach(var title in regionalTitles)
+                        {
+                            if (title.Value == null){
+                                regionalTitles[title.Key] = titleString;
+                            }
+                        }
+                    }
+                    
                     movieDtos.Add(new MovieDto
                     {
                         Id = idString,
                         Title = titleString,
+                        RegionalTitles = regionalTitles,
                         ImageUrl = imageString,
                         ReleaseYear = releaseYear,
                         Rating = ratingElement.Item1,
@@ -344,35 +358,23 @@ namespace SearchTheWebServer.Controller
                     movieDtos = movieDtos.FindAll(m => (m.ReleaseYear <= filterDTO.EndYear  && m.ReleaseYear >= filterDTO.StartYear));
                 }
           
-var searchLog = new SearchLog
-{
-    IdUser = filterDTO?.IdUser ?? default,
-    Date = DateTime.Now,
-    Action = "search",
-    ActionDetail = filterDTO?.Title ?? string.Empty
-};
-
-
-
-
-
+                var searchLog = new SearchLog
+                {
+                    IdUser = filterDTO?.IdUser ?? default,
+                    Date = DateTime.Now,
+                    Action = "search",
+                    ActionDetail = filterDTO?.Title ?? string.Empty
+                };
                 _context.SearchLogs.Add(searchLog);
                 await _context.SaveChangesAsync();
-if (string.Equals(filterDTO?.sort, "incr", StringComparison.OrdinalIgnoreCase))
-{
-    return Ok(movieDtos.OrderBy(m => m.ReleaseYear));
-}
-else
-{
-    return Ok(movieDtos.OrderByDescending(m => m.ReleaseYear));
-}
-
-
-
-
-
-
-             
+                if (string.Equals(filterDTO?.sort, "incr", StringComparison.OrdinalIgnoreCase))
+                {
+                    return Ok(movieDtos.OrderBy(m => m.ReleaseYear));
+                }
+                else
+                {
+                    return Ok(movieDtos.OrderByDescending(m => m.ReleaseYear));
+                }
             }
 
         }
@@ -418,19 +420,57 @@ private async Task<AwardDetailsDto> GetMovieAwardDetails(string titleId)
  * Parameters: string titleId
  * Returns: AwardDetails
  */
-[HttpGet("awards/{titleId}")]
-public async Task<ActionResult<AwardDetailsDto>> GetAwards(string titleId)
-{
-    try
-    {
-        var awardDetails = await GetMovieAwardDetails(titleId);
-        return Ok(awardDetails);
-    }
-    catch (Exception ex)
-    {
-        return StatusCode(500, $"Error getting award details: {ex.Message}");
-    }
-}
+        [HttpGet("awards/{titleId}")]
+        public async Task<ActionResult<AwardDetailsDto>> GetAwards(string titleId)
+        {
+            try
+            {
+                var awardDetails = await GetMovieAwardDetails(titleId);
+                return Ok(awardDetails);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error getting award details: {ex.Message}");
+            }
+        }
+
+        [HttpGet]
+        private async Task<Dictionary<string,string?>> GetRegionalTitles(string id)
+        {
+            Dictionary<string, string?> movieDictionary = new() {
+                {"US", null},
+                {"ES", null},
+                {"DE", null},
+                {"RO", null},
+            };
+
+            var client = new HttpClient();
+            var request = new HttpRequestMessage(HttpMethod.Get,
+                $"https://moviesdatabase.p.rapidapi.com/titles/{id}/aka");
+                request.Headers.Add("X-RapidAPI-Host", "509bfe4d46msh8bdf8fc04feb77ap1cc63bjsn910919245f2e");
+                request.Headers.Add("X-RapidAPI-Key", ApiKey);
+
+            using (var response = await client.SendAsync(request))
+            {
+                response.EnsureSuccessStatusCode();
+                var body = await response.Content.ReadAsStringAsync();
+
+                var document = JsonDocument.Parse(body);
+                var root = document.RootElement;
+                var results = root.GetProperty("results");
+                var resultList = results.EnumerateArray().ToList();
+
+                foreach (var result in resultList)
+                {
+                    var foundRegion = result.GetProperty("region").ToString();
+                    if (movieDictionary.ContainsKey(foundRegion)){
+                        var titleString = result.GetProperty("title").ToString();
+                        movieDictionary[foundRegion] = titleString;
+                    }
+                }
+            }
+            return movieDictionary;
+        }
 
     }
 }
