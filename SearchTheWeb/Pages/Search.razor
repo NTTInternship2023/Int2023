@@ -12,25 +12,6 @@
     <link rel="stylesheet" href="css/search.css" />
 </head>
 
-<div class="user-info">
-    @if (!string.IsNullOrEmpty(currentUser))
-    {
-        <p>Logged in as: <a class="user-link" @onclick="ShowUserPopup">@currentUser</a></p>
-        @if (showUserPopup)
-        {
-            <div class="user-popup">
-                <button class="popup-button" @onclick="LogOut">Log out</button>
-                <button class="popup-button" @onclick="ChangePassword">Change Password</button>
-            </div>
-            <div class="popup-overlay" @onclick="CloseUserPopup"></div>
-        }
-    }
-    else
-    {
-        <p>Not logged in.</p>
-    }
-</div>
-
 
 <h1 class="search-heading">Search Title</h1>
 
@@ -227,21 +208,6 @@
         }
     }
 
-    private async Task LogOut()
-    {
-        await _localstorage.RemoveItemAsync("id");
-        await _localstorage.RemoveItemAsync("username");
-        NavigationManager.NavigateTo("../login", forceLoad:true);
-    }
-    private void ShowUserPopup()
-    {
-        showUserPopup = true;
-    }
-
-    private void CloseUserPopup()
-    {
-        showUserPopup = false;
-    }
     
     public string ReturnStarRating(double? rating)
     {

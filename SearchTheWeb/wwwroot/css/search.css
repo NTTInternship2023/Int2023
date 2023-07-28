@@ -7,7 +7,7 @@
     }
 
     .search-heading {
-        text-align: left;
+        text-align: center;
     }
 
     /* User Popup Styles */
@@ -203,4 +203,8 @@ container {
 .movie-info {
     display: flex;
     flex-direction: column;
+}
+.no-results-found{
+    margin: 20px;
+    text-align: center;
 }

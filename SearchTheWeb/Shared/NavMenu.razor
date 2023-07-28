@@ -1,49 +1,74 @@
 ﻿@page "/"
 @inject ILocalStorageService _localstorage;
+@inject NavigationManager NavigationManager
 
-<div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
-    <nav class="flex-column">
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="/index">
-                <span class="oi oi-list-rich" aria-hidden="true"></span> Start Page
-            </NavLink>
-        </div>
+<MatAppBarContainer class="top" @onclick="ToggleNavMenu">
+    <MatAppBar Fixed="true">
+            <MatAppBarSection>
 
-        @if (!string.IsNullOrEmpty(currentUser))
-        {
-            <div class="nav-item px-3">
-                <NavLink class="nav-link" href="search">
-                    <span class="oi oi-list-rich" aria-hidden="true"></span> Main Page
-                </NavLink>
-            </div>
-            @if(_isAdmin){
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link" href="/index">
+                            <span class="oi oi-list-rich" aria-hidden="true"> Start Page</span>
+                        </NavLink>
+                    </div>
 
-            <div class="nav-item px-3">
-                <NavLink class="nav-link" href="admin">
-                    <span class="oi oi-list-rich" aria-hidden="true"></span> Admin
-                </NavLink>
-            </div>
-            } 
+                    @if (!string.IsNullOrEmpty(currentUser))
+                    {
+                        <div class="nav-item px-3">
+                            <NavLink class="nav-link" href="search">
+                                <span class="oi oi-list-rich" aria-hidden="true"> Main Page</span>
+                            </NavLink>
+                        </div>
+                        @if(_isAdmin){
 
-            <div class="nav-item px-3">
-                <NavLink class="nav-link" href="weeklysearchgraph">
-                    <span class="oi oi-list-rich" aria-hidden="true"></span> Top Weekly Searches
-                </NavLink>
-            </div>
-        }
-        @if (string.IsNullOrEmpty(currentUser))
-       { <div class="nav-item px-3">
-            <NavLink class="nav-link" href="login">
-                <span class="oi oi-list-rich" aria-hidden="true"></span> Login
-            </NavLink>
-        </div>
-       }
-    </nav>
-</div>
+                        <div class="nav-item px-3">
+                            <NavLink class="nav-link" href="admin">
+                                <span class="oi oi-list-rich" aria-hidden="true"> Admin</span>
+                            </NavLink>
+                        </div>
+                        } 
+
+                        <div class="nav-item px-3">
+                            <NavLink class="nav-link" href="weeklysearchgraph">
+                                <span class="oi oi-list-rich" aria-hidden="true"> Top Weekly Searches</span>
+                            </NavLink>
+                        </div>
+                    }
+                    @if (string.IsNullOrEmpty(currentUser))
+                { <div class="nav-item px-3">
+                        <NavLink class="nav-link" href="login">
+                            <span class="oi oi-list-rich" aria-hidden="true"> Login</span>
+                        </NavLink>
+                    </div>
+                }
+                
+                <div class="user-info">
+                    @if (!string.IsNullOrEmpty(currentUser))
+                    {
+                        <a>Logged in as: <a class="user-link" @onclick="ShowUserPopup">@currentUser</a></a>
+                        @if (showUserPopup)
+                        {
+                            <div class="user-popup">
+                                <button class="popup-button" @onclick="LogOut">Log out</button>
+                                <button class="popup-button" @onclick="CloseUserPopup">Change Password</button>
+                            </div>
+                            <div class="popup-overlay" @onclick="CloseUserPopup"></div>
+                        }
+                    }
+                    else
+                    {
+                        <a>Not logged in.</a>
+                    }
+                </div>
+            </MatAppBarSection>
+    </MatAppBar>
+</MatAppBarContainer>
 
 @code {
     private string currentUser = "";
     private bool _isAdmin;
+    private bool showUserPopup = false;
+    private int? localId;
     protected override async Task OnInitializedAsync()
     {
         await UpdateCurrentUserInfo();
@@ -60,6 +85,7 @@
 
     private async Task UpdateCurrentUserInfo()
     {
+        localId = await _localstorage.GetItemAsync<int?>("id")??20; 
         currentUser = await _localstorage.GetItemAsync<string>("username");
         _isAdmin = await _localstorage.GetItemAsync<bool>("isAdmin");
         StateHasChanged();
@@ -78,4 +104,37 @@
         _isAdmin= await _localstorage.GetItemAsync<bool>("isAdmin");
        
     }
+
+    private async Task LogOut()
+    {
+        await _localstorage.RemoveItemAsync("id");
+        await _localstorage.RemoveItemAsync("username");
+        NavigationManager.NavigateTo("../login", forceLoad:true);
+    }
+    private void ShowUserPopup()
+    {
+        showUserPopup = true;
+    }
+
+    private void CloseUserPopup()
+    {
+        showUserPopup = false;
+    }
+
 }
+
+<style>
+.top {
+    width: 10px;
+        position: fixed;
+        top: 0;
+        left: 0;
+        background-color: #ffffff; /* Schimbați culoarea de fundal la nevoie */
+        z-index: 1000; /* Asigurați-vă că acesta este un număr suficient de mare pentru a se afișa corect deasupra conținutului */
+    }
+
+    /* Stiluri pentru conținutul principal */
+    body {
+        padding-top: 50px; /* Ajustați valoarea la nevoie pentru a potrivi distanța dintre meniu și conținut */
+    }
+</style>

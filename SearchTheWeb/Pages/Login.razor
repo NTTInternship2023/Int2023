@@ -101,8 +101,8 @@
     protected override async Task OnInitializedAsync()
     {
         localId = await _localstorage.GetItemAsync<int>("id");
-        if (localId != 0 || localId != null){
-            NavigationManager.NavigateTo("../search", forceLoad:true);
+        if (localId != null && localId ==20){
+            NavigationManager.NavigateTo("/search", forceLoad:true);
         }
     }
 
