@@ -42,7 +42,7 @@
                     </div>
                 }
                 
-                <div class="user-info">
+                <MatAppBarSection Align="@MatAppBarSectionAlign.End">
                     @if (!string.IsNullOrEmpty(currentUser))
                     {
                         <a>Logged in as: <a class="user-link" @onclick="ShowUserPopup">@currentUser</a></a>
@@ -59,7 +59,7 @@
                     {
                         <a>Not logged in.</a>
                     }
-                </div>
+                </MatAppBarSection>
             </MatAppBarSection>
     </MatAppBar>
 </MatAppBarContainer>
