@@ -158,10 +158,8 @@
         currentUser = await _localstorage.GetItemAsync<string>("username");
         Console.WriteLine(localId);
     }
-    private void ChangePassword(){
-        if (!string.IsNullOrEmpty(currentUser))
-            NavigationManager.NavigateTo("../change_password", forceLoad:true );
-    }
+
+
     private async Task GetSearchSuggestions(string? searchTerm = null)
     { 
         try
@@ -184,7 +182,6 @@
                 StateHasChanged();
             }
         }
-
 
         }
         catch (Exception ex)
@@ -244,6 +241,7 @@
         else{
             Console.WriteLine("Error");
         }
+
     }
 
     
@@ -273,6 +271,7 @@
         public int numVotes { get; set; }
         public Dictionary<string, string?>? regionalTitles { get; set; }
     }
+      
     public class SearchTerm
     {
         public DateTime Date { get; set; }
