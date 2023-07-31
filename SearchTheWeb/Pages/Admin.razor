@@ -13,6 +13,11 @@
 </head>
 
 <h1>Admin Page</h1>
+
+<div class="graph">
+    <WeeklySearchGraph />
+</div>
+
 <div class="user-info">
     @if (!string.IsNullOrEmpty(currentUser))
     {
@@ -43,9 +48,9 @@
 </form>
 
 <div class="admin-actions">
-    <button type="button" class="btn btn-success add-button" disabled @onclick="OpenAddHashtagPopup">Add Hashtag</button>
+    @* <button type="button" class="btn btn-success add-button" disabled @onclick="OpenAddHashtagPopup">Add Hashtag</button> *@
     <button type="button" class="btn btn-primary view-activity-button" @onclick="ToggleUserActivity">View User Activity</button>
-    <button type="button" class="btn btn-primary show-hide-button" disabled @onclick="ToggleShowHidePosts">Show/Hide Posts</button>
+    @* <button type="button" class="btn btn-primary show-hide-button" disabled @onclick="ToggleShowHidePosts">Show/Hide Posts</button> *@
 </div>
 
 
@@ -111,7 +116,7 @@
 
         // Dummy data for user activity
         var httpClient = new HttpClient();
-        var request=new HttpRequestMessage(HttpMethod.Get, "https://localho.st:7194/Logger/GetAll");
+        var request=new HttpRequestMessage(HttpMethod.Get, "https://localhost:7194/Logger/GetAll");
 
         var response=await httpClient.SendAsync(request);
         response.EnsureSuccessStatusCode();
