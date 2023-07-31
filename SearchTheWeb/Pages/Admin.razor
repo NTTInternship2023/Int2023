@@ -13,6 +13,7 @@
 </head>
 
 <h1>Admin Page</h1>
+
 <div class="user-info">
     @if (!string.IsNullOrEmpty(currentUser))
     {
@@ -43,14 +44,16 @@
 </form>
 
 <div class="admin-actions">
-    <button type="button" class="btn btn-success add-button" disabled @onclick="OpenAddHashtagPopup">Add Hashtag</button>
-    <button type="button" class="btn btn-primary view-activity-button" @onclick="ToggleUserActivity">View User Activity</button>
-    <button type="button" class="btn btn-primary show-hide-button" disabled @onclick="ToggleShowHidePosts">Show/Hide Posts</button>
+    @* <button type="button" class="btn btn-success add-button" disabled @onclick="OpenAddHashtagPopup">Add Hashtag</button> *@
+    <button type="button" class="btn btn-primary view-activity-button" @onclick="ToggleUserActivity">View Graph</button>
+    @* <button type="button" class="btn btn-primary show-hide-button" disabled @onclick="ToggleShowHidePosts">Show/Hide Posts</button> *@
 </div>
 
 
 @if (showUserActivity)
 {
+    <WeeklySearchGraph/>
+}
     <div class="user-activity">
         <h2>User Activity</h2>
         <table class="table table-striped">
@@ -78,8 +81,6 @@
             </tbody>
         </table>
     </div>
-}
-
 
 @code {
     private SearchTerm[]? allHashtags;
@@ -133,6 +134,7 @@ if (save != null)
 
         users.Add(searchLog);
     }
+    users.Sort((a, b) => b.Date.CompareTo(a.Date));
 }
 
 

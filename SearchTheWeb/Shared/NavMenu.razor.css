@@ -5,31 +5,27 @@
 .top-row {
     height: 3.5rem;
     background-color: rgba(0,0,0,0.4);
+    display: flex; /* Adăugăm flex pentru a asigura elementele pe o linie */
+    align-items: center;
 }
+
 
 .navbar-brand {
     font-size: 1.1rem;
+    position: fixed;
 }
 
 .oi {
-    width: 2rem;
+    width: 7rem;
     font-size: 1.1rem;
     vertical-align: text-top;
-    top: -2px;
 }
 
 .nav-item {
+    text-align: left;
     font-size: 0.9rem;
-    padding-bottom: 0.5rem;
+    
 }
-
-    .nav-item:first-of-type {
-        padding-top: 1rem;
-    }
-
-    .nav-item:last-of-type {
-        padding-bottom: 1rem;
-    }
 
     .nav-item ::deep a {
         color: #d7d7d7;
@@ -60,3 +56,49 @@
         display: block;
     }
 }
+
+
+.user-popup {
+    position: fixed;
+    top: 60px;
+    right: 20px;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 10px;
+    z-index: 9999;
+}
+
+.user-link {
+    cursor: pointer;
+    text-decoration: underline;
+    color: #fff;
+    
+}
+
+.popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 9998;
+}
+
+popup-button {
+    background-color: #ffffff;
+    color: #fff;
+    border: none;
+    padding: 8px 16px;
+    margin-right: 10px;
+    cursor: pointer;
+}
+
+.popup-button:hover {
+    background-color: #ffffff;
+}
+.nav-item:not(:last-child) {
+    margin-right: 10px;
+}
+

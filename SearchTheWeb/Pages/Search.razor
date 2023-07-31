@@ -1,7 +1,7 @@
 @page "/search"
 @inject HttpClient Http
 @inject NavigationManager NavigationManager
-@inject ILocalStorageService _localstorage;
+@inject ILocalStorageService _localstorage
 @using System.Text
 @using System.Net.Http
 @using System.Text.Json
@@ -12,25 +12,6 @@
     <link rel="stylesheet" href="css/search.css" />
 </head>
 
-<div class="user-info">
-    @if (!string.IsNullOrEmpty(currentUser))
-    {
-        <p>Logged in as: <a class="user-link" @onclick="ShowUserPopup">@currentUser</a></p>
-        @if (showUserPopup)
-        {
-            <div class="user-popup">
-                <button class="popup-button" @onclick="LogOut">Log out</button>
-                <button class="popup-button" @onclick="CloseUserPopup">Change Password</button>
-            </div>
-            <div class="popup-overlay" @onclick="CloseUserPopup"></div>
-        }
-    }
-    else
-    {
-        <p>Not logged in.</p>
-    }
-</div>
-
 
 <h1 class="search-heading">Search Title</h1>
 
@@ -38,14 +19,17 @@
     <div class="search-bar">
         <input id="searchBox" type="text" list="txtsearch" @oninput="@UpdateSearchTermString" placeholder="Enter your search term"/>
         <datalist id="txtsearch">
-            @if(lista!=null)
-            @foreach(var item in lista){
-                <option>@item</option>
+            @if (lista != null)
+            {
+                foreach(var item in lista){
+                    <option>@item</option>
+                }    
             }
+            
         </datalist>
         <br> -Start Year-
         <input type="text" class="form-control search-input" id="StartYear" @bind="@StartYear" placeholder="Start Year" />
-         -End Year-
+        -End Year-
         <input type="text" class="form-control search-input" id="endYear" @bind="@EndYear" />
         -Sortare-
         <select class="form-control search-input" @bind="@Sort">
@@ -53,13 +37,24 @@
             <option>decr</option>
         </select>
         -Tipul-
-       <select class="form-control search-input" @bind="@TitleType">
+        <select class="form-control search-input" @bind="@TitleType">
             <option value="movie,tvSeries">All</option>
             <option value="movie">movie</option>
             <option value="tvSeries">tvSeries</option>
         </select>
-        
     </div>
+    <div class="nav-item px-3">
+        <div class="form-group">
+            <label class="nav-link language-label" for="languageSelect">Select Language:</label>
+            <select @bind="@currentLanguage" class="form-control" id="languageSelect">
+                @foreach (var language in languages)
+                {   
+                    <option value="@language.Key" >@language.Value </option>
+                }
+            </select>
+        </div>
+    </div>
+    <br/>   
     <button type="button" class="btn btn-primary search-button" @onclick="PerformSearch">Search</button>
 </form>
 
@@ -92,13 +87,11 @@
                         
                     </div>
                     <div class="movie-info">
-                        <h3>@movie.title</h3>
+                        <h3>@movie.regionalTitles[currentLanguage]</h3>
                         <p>Release year: @movie.releaseYear</p>
                         <p>  <div class="stars"><span class="tooltiptext">@movie.numVotes votes</span><div class="percent" style="width:@ReturnStarRating(movie.rating);"></div></div></p>
                         </div>
                     </div>
-                </div>
-
             }
         </div>
     }
@@ -124,8 +117,30 @@
             searchTerm=value;
         }
     }}
+    
+    
+    
+    private string currentLanguage = "US";
+    private Dictionary<string, string> languages = new Dictionary<string, string>()
+    {
+        { "US", "English" },
+        { "RO", "Romana" },
+        { "DE", "Deutsch" },
+        { "ES", "Espanol" }
+    };
+    
+    private Dictionary<string, string> languageIcons = new Dictionary<string, string>()
+    {
+        { "US", "images/united-states.png" },
+        { "RO", "images/romania.png" },
+        { "DE", "images/germany.png" },
+        { "ES", "images/spain.png" }
+    };
+    
+    
+    
     private int StartYear;
-    private string? Sort;
+    private string? Sort = "incr";
     private string? TitleType;
     private int EndYear=2024;
     private string currentUser = "N/A";
@@ -141,7 +156,7 @@
         movies=new List<Movie>();
         localId = await _localstorage.GetItemAsync<int?>("id")??20;
         currentUser = await _localstorage.GetItemAsync<string>("username");
-            Console.WriteLine(localId);
+        Console.WriteLine(localId);
     }
 
 
@@ -194,23 +209,33 @@
 
 
         HttpResponseMessage response = await client.PostAsync("https://localho.st:7194/api/User/Filter", content);
-
+        
         if(response.IsSuccessStatusCode){
             var responseContent = await response.Content.ReadAsStringAsync();
 
             movies=JsonSerializer.Deserialize<List<Movie>>(responseContent);
-
-
+            
+            //Set movies regional titles in US to title
+            foreach(var movie in movies){
+                movie.regionalTitles["US"]=movie.title;
+            }
+            
         foreach(var movie in movies){
-            Random random = new Random();
-            int x = random.Next(0, 10);
-            int y = random.Next(0, 10);
+            try{
+             var newRequest = new HttpRequestMessage(HttpMethod.Get, $"https://localhost:7194/api/User/awards/{movie.id}");
+            var newResponse = await client.SendAsync(newRequest);
+            
+            if(newResponse.IsSuccessStatusCode){
+            var newResponseContent = await newResponse.Content.ReadAsStringAsync();
+            Nom rez=JsonSerializer.Deserialize<Nom>(newResponseContent);
 
-            movie.nomination=x;
-            movie.award=y;
-
+            movie.nomination=rez.numberOfNominations;
+            movie.award=rez.numberOfWins;
+            }
+            }catch(Exception ex){
+                Console.WriteLine(ex.ToString());
+            }
         }
-        
             StateHasChanged();
         }
         else{
@@ -219,23 +244,9 @@
 
     }
 
-    private async Task LogOut()
-    {
-        await _localstorage.RemoveItemAsync("id");
-        await _localstorage.RemoveItemAsync("username");
-        NavigationManager.NavigateTo("../login", forceLoad:true);
-    }
-    private void ShowUserPopup()
-    {
-        showUserPopup = true;
-    }
-
-    private void CloseUserPopup()
-    {
-        showUserPopup = false;
-    }
     
     public string ReturnStarRating(double? rating)
+
     {
         string starRating = "0%";
         if(rating!=null)
@@ -258,6 +269,7 @@
         public int? nomination=0;
         public int? award=0;
         public int numVotes { get; set; }
+        public Dictionary<string, string?>? regionalTitles { get; set; }
     }
       
     public class SearchTerm
@@ -266,6 +278,11 @@
         public string? Name { get; set; }
         public string? Summary { get; set; }
         public string? PhotoUrl { get; set; }
+    }
+    public class Nom
+    {
+        public int numberOfNominations {get; set;}
+        public int numberOfWins {get; set;}
     }
 
 }

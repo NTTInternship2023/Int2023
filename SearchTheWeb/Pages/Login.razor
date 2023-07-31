@@ -80,6 +80,8 @@
 @code
 {
 //VARIABILE SETATE
+    int? localId;
+
     string Username = string.Empty;
     string Password = string.Empty;
 
@@ -95,6 +97,14 @@
 
     LoginStatus loginStatus = new();
     RegisterStatus registerStatus = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        localId = await _localstorage.GetItemAsync<int>("id");
+        if (localId != null && localId ==20){
+            NavigationManager.NavigateTo("/search", forceLoad:true);
+        }
+    }
 
 //REGISTER/WARNING POPUP
     void setPopup(bool state)
@@ -157,8 +167,9 @@
         {
             await _localstorage.SetItemAsync("id", loginStatus.id);
             await _localstorage.SetItemAsync("username", loginStatus.username);
+            await _localstorage.SetItemAsync("isAdmin", loginStatus.isAdmin);
             setWarning(true, loginStatus.message);
-            NavigationManager.NavigateTo("../search", forceLoad:true);
+            NavigationManager.NavigateTo("/search", forceLoad:true);
         }
         else
             setWarning(true, loginStatus.message);
