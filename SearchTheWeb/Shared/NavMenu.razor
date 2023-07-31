@@ -50,7 +50,7 @@
                         {
                             <div class="user-popup">
                                 <button class="popup-button" @onclick="LogOut">Log out</button>
-                                <button class="popup-button" @onclick="CloseUserPopup">Change Password</button>
+                                <button class="popup-button" @onclick="ChangePassword">Change Password</button>
                             </div>
                             <div class="popup-overlay" @onclick="CloseUserPopup"></div>
                         }
@@ -94,6 +94,12 @@
     private bool collapseNavMenu = true;
 
     private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+
+    private void ChangePassword(){
+        if (!string.IsNullOrEmpty(currentUser))
+            NavigationManager.NavigateTo("../change_password", forceLoad:false );
+        CloseUserPopup();
+    }
 
     private void ToggleNavMenu()
     {

@@ -52,7 +52,9 @@
 
 @if (showUserActivity)
 {
-    <WeeklySearchGraph/>
+    <div class="graph">
+        <WeeklySearchGraph />
+    </div>
 }
     <div class="user-activity">
         <h2>User Activity</h2>
@@ -112,7 +114,7 @@
 
         // Dummy data for user activity
         var httpClient = new HttpClient();
-        var request=new HttpRequestMessage(HttpMethod.Get, "https://localho.st:7194/Logger/GetAll");
+        var request=new HttpRequestMessage(HttpMethod.Get, "https://localhost:7194/Logger/GetAll");
 
         var response=await httpClient.SendAsync(request);
         response.EnsureSuccessStatusCode();
