@@ -32,15 +32,15 @@
 
 <form class="search-form">
     <div class="search-bar">
-        <input type="text" class="form-control" id="searchInput" list="nameSuggestions" @bind="@searchTerm" placeholder="Enter your search term" />
-        @if (string.IsNullOrEmpty(searchTerm))
+        <input type="text" class="form-control" id="searchInput" list="nameSuggestions" @oninput="@UpdateSearchTermString" placeholder="Search in logs" />
+        @if (string.IsNullOrEmpty(SearchTerm))
         {
             <span class="search-icon">
                 <i class="bi bi-search"></i>
             </span>
         }
     </div>
-    <button type="button" class="btn btn-primary search-button" @onclick="PerformSearch">Search</button>
+    @* <button type="button" class="btn btn-primary search-button" @onclick="PerformSearch">Search</button> *@
 </form>
 
 <div class="admin-actions">
@@ -69,7 +69,7 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach (var user in users)
+                @foreach (var user in logs)
                 {
                     <tr>
                         <td>@user.id</td>
@@ -85,11 +85,21 @@
     </div>
 
 @code {
-    private SearchTerm[]? allHashtags;
-    private SearchTerm[]? hashtags;
+    private void UpdateSearchTermString(ChangeEventArgs e)
+    {
+        SearchTerm = e.Value.ToString();
+    }
     private string? searchTerm;
+    private string? SearchTerm{
+        get{
+            return searchTerm;
+            }
+        set{
+            searchTerm=value;
+            PerformSearch(value);
+        }
+    }
     private string currentUser = "Admin";
-    private SearchTerm? newHashtag;
     private bool showAddHashtagPopup = false;
     private bool showUserActivity = false;
     private List<SearchLog> users=new List<SearchLog>();
@@ -108,10 +118,6 @@
 
     protected override async Task OnInitializedAsync()
     {
-        allHashtags = await Http.GetFromJsonAsync<SearchTerm[]>("sample-data/weather.json");
-        hashtags = allHashtags;
-        newHashtag = new SearchTerm();
-
         // Dummy data for user activity
         var httpClient = new HttpClient();
         var request=new HttpRequestMessage(HttpMethod.Get, "https://localhost:7194/Logger/GetAll");
@@ -119,68 +125,34 @@
         var response=await httpClient.SendAsync(request);
         response.EnsureSuccessStatusCode();
         var save=await response.Content.ReadFromJsonAsync<List<SearchLog>>();
-if (save != null)
-{
-    foreach (var ceva in save)
-    {
-        SearchLog searchLog = new SearchLog();
-
-        if (ceva != null)
+        if (save != null)
         {
-            searchLog.id = ceva.id; // Assuming id is of type int
-            searchLog.IdUser = ceva.IdUser; // Assuming IdUser is of type int
-            searchLog.Date = ceva.Date != null ? ceva.Date : DateTime.MinValue; // Assuming Date is of type DateTime
-            searchLog.Action = ceva.Action;
-            searchLog.ActionDetail = ceva.ActionDetail;
-        }
+            foreach (var ceva in save)
+            {
+                SearchLog searchLog = new SearchLog();
 
-        users.Add(searchLog);
-    }
-    users.Sort((a, b) => b.Date.CompareTo(a.Date));
-}
+                if (ceva != null)
+                {
+                    searchLog.id = ceva.id; // Assuming id is of type int
+                    searchLog.IdUser = ceva.IdUser; // Assuming IdUser is of type int
+                    searchLog.Date = ceva.Date != null ? ceva.Date : DateTime.MinValue; // Assuming Date is of type DateTime
+                    searchLog.Action = ceva.Action;
+                    searchLog.ActionDetail = ceva.ActionDetail;
+                }
 
-
-
-
-
-        
-    }
-
- private IEnumerable<string?> GetAvailableNames()
-{
-    if (allHashtags != null)
-    {
-        return allHashtags.Select(h => h.Name).Distinct();
-    }
-
-    return Enumerable.Empty<string?>();
-}
-
-
-
-private void PerformSearch()
-{
-    if (string.IsNullOrEmpty(searchTerm))
-    {
-        hashtags = allHashtags;
-    }
-    else
-    {
-        if (allHashtags != null)
-        {
-            hashtags = allHashtags.Where(h => h != null && h.Name != null && h.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)).ToArray();
-        }
-        else
-        {
-            hashtags = new SearchTerm[0]; // or an appropriate default value
+                users.Add(searchLog);
+            }
+            users.Sort((a, b) => b.Date.CompareTo(a.Date));
+            logs = users;
         }
     }
-}
-
-
-
-
-
+    private void PerformSearch(string value)
+    {
+        value = value?.Trim();
+        logs = users.Where(x => x.ActionDetail.ToLowerInvariant().Contains(value.ToLowerInvariant())).ToList();
+        StateHasChanged();
+    }
+    private List<SearchLog> logs = new List<SearchLog>();
     private void OpenAddHashtagPopup()
     {
         showAddHashtagPopup = true;
@@ -199,14 +171,6 @@ private void PerformSearch()
     private void ToggleShowHidePosts()
     {
         showPosts = !showPosts;
-    }
-
-    public class SearchTerm
-    {
-        public DateTime Date { get; set; }
-        public string? Name { get; set; }
-        public string? Summary { get; set; }
-        public string? PhotoUrl { get; set; }
     }
 
     public class SearchLog
