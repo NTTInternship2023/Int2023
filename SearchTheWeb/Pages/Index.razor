@@ -123,11 +123,16 @@
         
         foreach (var searchData in _searchDatas)
         {
-            topSearches.Add(searchData.keyword);
+            if (topSearches != null)
+{
+    topSearches.Add(searchData.keyword);
+}
         }
 
+
         random = new Random();
-        topSearches = topSearches.OrderBy(x => random.Next()).ToList();
+        if(topSearches !=null)
+        topSearches = topSearches.Where(x => x != null).OrderBy(x => random.Next()).ToList();
         placedWords = new List<WordProperties>();
     }
 }

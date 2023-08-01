@@ -7,3 +7,5 @@
 /.vscode/*
 /SearchTheWebServer/.vs/SearchTheWebServer
 *.wsuo
+/SearchTheWebServer/.vscode/launch.json
+/SearchTheWebServer/.vscode/tasks.json

@@ -87,7 +87,8 @@
                         
                     </div>
                     <div class="movie-info">
-                        <h3>@movie.regionalTitles[currentLanguage]</h3>
+                       @if(movie.regionalTitles!=null)
+                       { <h3>@movie.regionalTitles[currentLanguage]</h3>}
                         <p>Release year: @movie.releaseYear</p>
                         <p>  <div class="stars"><span class="tooltiptext">@movie.numVotes votes</span><div class="percent" style="width:@ReturnStarRating(movie.rating);"></div></div></p>
                         </div>
@@ -100,6 +101,7 @@
 @code {
     private void UpdateSearchTermString(ChangeEventArgs args)
     {
+        if(args.Value!=null)
         SearchTermString = args.Value.ToString();
     }
     private SearchTerm[]? allHashtags;
@@ -216,10 +218,12 @@
             movies=JsonSerializer.Deserialize<List<Movie>>(responseContent);
             
             //Set movies regional titles in US to title
+            if(movies!=null)
             foreach(var movie in movies){
+                if(movie.regionalTitles!=null)
                 movie.regionalTitles["US"]=movie.title;
             }
-            
+            if(movies!=null)
         foreach(var movie in movies){
             try{
              var newRequest = new HttpRequestMessage(HttpMethod.Get, $"https://localhost:7194/api/User/awards/{movie.id}");
@@ -227,10 +231,14 @@
             
             if(newResponse.IsSuccessStatusCode){
             var newResponseContent = await newResponse.Content.ReadAsStringAsync();
-            Nom rez=JsonSerializer.Deserialize<Nom>(newResponseContent);
+            
+            Nom? rez = JsonSerializer.Deserialize<Nom>(newResponseContent);
+if (rez != null)
+{
+    movie.nomination = rez?.numberOfNominations ?? 0; // Use null-coalescing operator to provide default value
+    movie.award = rez?.numberOfWins ?? 0; // Use null-coalescing operator to provide default value
+}
 
-            movie.nomination=rez.numberOfNominations;
-            movie.award=rez.numberOfWins;
             }
             }catch(Exception ex){
                 Console.WriteLine(ex.ToString());

@@ -223,7 +223,7 @@ namespace SearchTheWebServer.Controller
                     var titleString = element.GetProperty("titleText").GetProperty("text").ToString();
                     var imageElement = element.GetProperty("primaryImage");
                     var idString = element.GetProperty("id").ToString();
-                    double rating;
+                   // double rating;
 
                     var imageString = imageElement.ValueKind == JsonValueKind.Null
                         ? "https://reprospecialty.com/wp-content/themes/apexclinic/images/no-image/No-Image-Found-400x264.png"
@@ -312,9 +312,9 @@ namespace SearchTheWebServer.Controller
                     var imageElement = element.GetProperty("primaryImage");
                     var idString = element.GetProperty("id").ToString();
 
-                    HttpResponseMessage regionsResult;
+                   // HttpResponseMessage regionsResult;
                     
-                    double rating=0;
+                 //   double rating=0;
 
                     var imageString = imageElement.ValueKind == JsonValueKind.Null
                         ? "https://reprospecialty.com/wp-content/themes/apexclinic/images/no-image/No-Image-Found-400x264.png"
