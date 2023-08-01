@@ -3,6 +3,7 @@
 @using System.Text
 @using System.Net.Http
 @using System.Text.Json
+@using System.Linq
 
 @inject HttpClient Http
 
@@ -62,7 +63,7 @@
             <thead>
                 <tr>
                     <th>id</th>
-                    <th>IdUser</th>
+                    <th>Username</th>
                     <th>Date</th>
                     <th>Action</th>
                     <th>Details</th>
@@ -73,7 +74,7 @@
                 {
                     <tr>
                         <td>@user.id</td>
-                        <td>@user.IdUser</td>
+                        <td>@user.Username</td>
                         <td>@user.Date.ToShortDateString()</td>
                         <td>@user.Action</td>
                         <td>@user.ActionDetail</td>
@@ -144,7 +145,35 @@
             }
             users.Sort((a, b) => b.Date.CompareTo(a.Date));
             logs = users;
+            GetUsernames();
         }
+    }
+
+    private async void GetUsernames(){
+        HashSet<int> set=new HashSet<int>();
+        var httpClient = new HttpClient();
+
+        foreach(var x in users){
+            set.Add(x.IdUser);
+        }
+
+        string jsonString = JsonSerializer.Serialize(set);
+        HttpContent content=new StringContent(jsonString,Encoding.UTF8,"application/json");
+        
+        HttpResponseMessage response = await httpClient.PostAsync("https://localhost:7194/api/User/nume", content);
+        var responseContent = await response.Content.ReadAsStringAsync();
+
+        List<IdNume> data= JsonSerializer.Deserialize<List<IdNume>>(responseContent);
+        foreach(var ceva in logs){
+            var match = data.FirstOrDefault(val => val.idUser == ceva.IdUser);
+            
+            if(match!=null){
+                ceva.Username=match.username;
+                
+            }
+        }
+        StateHasChanged();
+
     }
     private void PerformSearch(string value)
     {
@@ -180,7 +209,13 @@
         public DateTime Date { get; set; }
         public string? Action { get; set; }
         public string? ActionDetail { get; set; }
+        public string? Username {get; set;}
         @* public bool ShowDetails { get; set; } = false; *@
+    }
+    public class IdNume 
+    {
+        public int idUser {get;set;}
+        public string? username {get;set;}
     }
 }
 

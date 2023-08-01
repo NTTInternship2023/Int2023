@@ -1,4 +1,5 @@
-﻿using Azure.Core;
+﻿using System.Runtime.InteropServices.ComTypes;
+using Azure.Core;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -8,6 +9,7 @@ using SearchTheWebServer.Models;
 using System.Security.Cryptography;
 using System.Text.Json;
 using Microsoft.AspNetCore.Identity;
+using System.Globalization;
 
 namespace SearchTheWebServer.Controller
 {
@@ -473,5 +475,39 @@ private async Task<AwardDetailsDto> GetMovieAwardDetails(string titleId)
             return movieDictionary;
         }
 
+        [HttpGet("IsAdmin")]
+        public async Task<bool> IsAdmin(string username){
+
+            try
+            {
+                var existingUser = await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
+                if(existingUser.IsAdmin){
+                    return true;
+                }else return false;
+            }
+            catch (Exception ex) {
+                Console.WriteLine(ex.Message);
+                return false;
+            }
+        }
+
+        [HttpPost("nume")]
+        public async Task<List<IdNume>> Nume([FromBody]HashSet<int> ids){
+
+            try
+            {
+                List<IdNume> lista=new List<IdNume>();
+                foreach(var id in ids){
+                    var existingUser = await _context.Users.FirstOrDefaultAsync(u => u.Id == id);
+                    IdNume val=new IdNume(id,existingUser.Username);
+                    lista.Add(val);
+                }
+                return lista;
+            }
+            catch (Exception ex) {
+                Console.WriteLine(ex.Message);
+                return null;
+            }
+        }
     }
 }
