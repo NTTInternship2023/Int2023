@@ -87,6 +87,7 @@
 @code {
     private void UpdateSearchTermString(ChangeEventArgs e)
     {
+        if(e.Value!= null)
         SearchTerm = e.Value.ToString();
     }
     private string? searchTerm;
@@ -96,6 +97,7 @@
             }
         set{
             searchTerm=value;
+            if(value!=null)
             PerformSearch(value);
         }
     }
@@ -148,8 +150,14 @@
     }
     private void PerformSearch(string value)
     {
-        value = value?.Trim();
-        logs = users.Where(x => x.ActionDetail.ToLowerInvariant().Contains(value.ToLowerInvariant())).ToList();
+        
+        value = value?.Trim() ?? ""; // Use null-coalescing operator to provide an empty string if 'value' is null
+
+// Assuming 'users' is a List<User> or IEnumerable<User> and 'ActionDetail' property is of type string
+logs = users
+    .Where(x => x.ActionDetail?.ToLowerInvariant().Contains(value.ToLowerInvariant()) == true)
+    .ToList();
+
         StateHasChanged();
     }
     private List<SearchLog> logs = new List<SearchLog>();
