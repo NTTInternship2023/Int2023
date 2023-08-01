@@ -9,39 +9,7 @@
     .search-heading {
         text-align: center;
     }
-
-    /* User Popup Styles */
-    .user-popup {
-        position: fixed;
-        top: 60px;
-        right: 20px;
-        background-color: #fff;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-        padding: 10px;
-        z-index: 9999;
-    }
-
-    .popup-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background-color: rgba(0, 0, 0, 0.5);
-        z-index: 9998;
-    }
-
-    .popup-content {
-        margin-bottom: 10px;
-        cursor: pointer;
-    }
-
-    .user-link {
-        cursor: pointer;
-        text-decoration: underline;
-    }
-   
+    
 .search-form {
     display: flex;
     flex-direction: column;

@@ -80,41 +80,6 @@
         right: 10px;
         display: block; /* or "none" depending on your intended behavior */
     }
-    
-
-    .popup-button {
-        background-color: #007bff;
-        color: #fff;
-        border: none;
-        padding: 8px 16px;
-        margin-right: 10px;
-        cursor: pointer;
-    }
-
-    .popup-button:hover {
-        background-color: #0056b3;
-    }
-
-    .user-popup {
-        position: absolute;
-        top: 30px;
-        right: 10px;
-        background-color: #fff;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-        padding: 10px;
-        z-index: 9999;
-    }
-
-    .popup-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background-color: rgba(0, 0, 0, 0.5);
-        z-index: 9998;
-    }
 
     .graph {
         position: relative;
