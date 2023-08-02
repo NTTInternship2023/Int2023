@@ -124,6 +124,7 @@
 
         var httpClient = new HttpClient();
         string username = await _localstorage.GetItemAsync<string>("username");
+        username = username ?? "nil";
         var request=new HttpRequestMessage(HttpMethod.Get, $"https://localhost:7194/api/User/IsAdmin?username={username}");
         var response=await httpClient.SendAsync(request);
         response.EnsureSuccessStatusCode();

@@ -105,7 +105,7 @@
     private SearchTerm[]? allHashtags;
     private SearchTerm[]? hashtags;
     private List<string>? lista = new List<string>();
-    private List<Movie>? movies;
+    private List<Movie> movies = new List<Movie>();
     private string? searchTerm = string.Empty;
     private string? SearchTermString{
         get {
@@ -157,7 +157,6 @@
         movies=new List<Movie>();
         localId = await _localstorage.GetItemAsync<int?>("id")??20;
         currentUser = await _localstorage.GetItemAsync<string>("username");
-        Console.WriteLine(localId);
     }
 
 

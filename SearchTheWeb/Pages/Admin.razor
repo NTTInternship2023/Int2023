@@ -242,8 +242,6 @@ private DateTime? endDate
     private void PerformSearch(string value)
 {
     value = value?.Trim();
-    Console.WriteLine("startdate"+startDate?.Date);
-    Console.WriteLine("enddate"+endDate?.Date);
     logs = users.Where(x => x.ActionDetail != null 
     && x.Date != null && startDate != null && endDate != null 
     && x.ActionDetail.ToLowerInvariant().Contains(value.ToLowerInvariant()) 
