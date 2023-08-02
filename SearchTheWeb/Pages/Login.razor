@@ -168,7 +168,7 @@
             await _localstorage.SetItemAsync("id", loginStatus.id);
             await _localstorage.SetItemAsync("username", loginStatus.username);
             setWarning(true, loginStatus.message);
-            NavigationManager.NavigateTo("/search", forceLoad:true);
+            NavigationManager.NavigateTo("/index", forceLoad:true);
         }
         else
             setWarning(true, loginStatus.message);
