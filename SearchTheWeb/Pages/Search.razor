@@ -61,13 +61,13 @@
 
 @if (!showUserPopup)  // Display hashtags only if user popup is not shown
 {
-    if (movies == null)
+    if (IsLoading)
     {
-        <p><em>Loading...</em></p>
+        <p style="text-align: center; padding: 20px;"><em>Loading...</em></p>
     }
-    else if (movies.Count == 0)
+    else if (noResult)
     {
-        <p>No results found.</p>
+        <p style="text-align: center; padding: 20px;">No results found.</p>
     }
     else
     {
@@ -137,19 +137,20 @@
         { "ES", "images/spain.png" }
     };
     
-    
-    
     private int StartYear;
     private string? Sort = "incr";
     private string? TitleType;
     private int EndYear=2024;
     private string currentUser = "N/A";
     private bool showUserPopup = false;
+    private bool noResult;
+    private bool IsLoading;
     private int? localId;// for testing purposes
 
     protected override async Task OnInitializedAsync()
     {
         // Initialize data
+        noResult = false;
         allHashtags = await Http.GetFromJsonAsync<SearchTerm[]>("/sample-data/weather.json");
         hashtags = allHashtags;
         lista = new List<string>();
@@ -166,22 +167,22 @@
         {
             if (!string.IsNullOrEmpty(searchTerm))
             {
-            using(var httpClient = new HttpClient())
-            {
-                var request = new HttpRequestMessage(HttpMethod.Get, $"https://localhost:7194/Logger/Suggestions?hint={searchTerm}");
-                var response = await httpClient.SendAsync(request);
-                response.EnsureSuccessStatusCode();
-                var result = await response.Content.ReadFromJsonAsync<List<string>>();
-                
-                if(result!=null){
-                    if(result.Count>10){
-                        result=result.GetRange(0,10);
+                using(var httpClient = new HttpClient())
+                {
+                    var request = new HttpRequestMessage(HttpMethod.Get, $"https://localhost:7194/Logger/Suggestions?hint={searchTerm}");
+                    var response = await httpClient.SendAsync(request);
+                    response.EnsureSuccessStatusCode();
+                    var result = await response.Content.ReadFromJsonAsync<List<string>>();
+                    
+                    if(result!=null){
+                        if(result.Count>10){
+                            result=result.GetRange(0,10);
+                        }
                     }
+                    lista = result ?? null;
+                    StateHasChanged();
                 }
-                lista = result ?? null;
-                StateHasChanged();
             }
-        }
 
         }
         catch (Exception ex)
@@ -203,45 +204,56 @@
             IdUser=localId //modificat sa foloseasca id user logat
         };
 
-        string jsonString = JsonSerializer.Serialize(jsonContent);
+        if (!string.IsNullOrEmpty(jsonContent.Title))
+        {
+            string jsonString = JsonSerializer.Serialize(jsonContent);
 
-        HttpContent content=new StringContent(jsonString,Encoding.UTF8,"application/json");
+            HttpContent content=new StringContent(jsonString,Encoding.UTF8,"application/json");
 
-
-        HttpResponseMessage response = await client.PostAsync("https://localhost:7194/api/User/Filter", content);
-        
-        if(response.IsSuccessStatusCode){
-            var responseContent = await response.Content.ReadAsStringAsync();
-
-            movies=JsonSerializer.Deserialize<List<Movie>>(responseContent);
+            IsLoading = true;
+            HttpResponseMessage response = await client.PostAsync("https://localhost:7194/api/User/Filter", content);
             
-            //Set movies regional titles in US to title
-            foreach(var movie in movies){
-                movie.regionalTitles["US"]=movie.title;
-            }
-            
-        foreach(var movie in movies){
-            try{
-             var newRequest = new HttpRequestMessage(HttpMethod.Get, $"https://localhost:7194/api/User/awards/{movie.id}");
-            var newResponse = await client.SendAsync(newRequest);
-            
-            if(newResponse.IsSuccessStatusCode){
-            var newResponseContent = await newResponse.Content.ReadAsStringAsync();
-            Nom rez=JsonSerializer.Deserialize<Nom>(newResponseContent);
+            if(response.IsSuccessStatusCode){
+                var responseContent = await response.Content.ReadAsStringAsync();
 
-            movie.nomination=rez.numberOfNominations;
-            movie.award=rez.numberOfWins;
-            }
-            }catch(Exception ex){
-                Console.WriteLine(ex.ToString());
-            }
-        }
-            StateHasChanged();
-        }
-        else{
-            Console.WriteLine("Error");
-        }
+                movies=JsonSerializer.Deserialize<List<Movie>>(responseContent);
+                
+                //Set movies regional titles in US to title
+                foreach(var movie in movies){
+                    movie.regionalTitles["US"]=movie.title;
+                }
+                
+                foreach(var movie in movies)
+                {
+                    try{
+                        var newRequest = new HttpRequestMessage(HttpMethod.Get, $"https://localhost:7194/api/User/awards/{movie.id}");
+                        var newResponse = await client.SendAsync(newRequest);
+                        
+                        if(newResponse.IsSuccessStatusCode)
+                        {
+                            var newResponseContent = await newResponse.Content.ReadAsStringAsync();
+                            Nom rez=JsonSerializer.Deserialize<Nom>(newResponseContent);
 
+                            movie.nomination=rez.numberOfNominations;
+                            movie.award=rez.numberOfWins;
+                        }
+                    }catch(Exception ex){
+                        Console.WriteLine(ex.ToString());
+                    }
+                }
+                IsLoading = false;
+            }
+            else{
+                Console.WriteLine("Error");
+            }
+        } else 
+        {
+            noResult = true;
+        }
+        if (movies != null && movies.Count == 0)
+            noResult = true;
+        IsLoading = false;
+        StateHasChanged();
     }
 
     
