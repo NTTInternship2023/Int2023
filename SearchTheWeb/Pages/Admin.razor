@@ -3,6 +3,7 @@
 @using System.Text
 @using System.Net.Http
 @using System.Text.Json
+@using MatBlazor
 @using System.Linq
 
 @inject HttpClient Http
@@ -34,6 +35,11 @@
 <form class="search-form">
     <div class="search-bar">
         <input type="text" class="form-control" id="searchInput" list="nameSuggestions" @oninput="@UpdateSearchTermString" placeholder="Search in logs" />
+
+        <!-- Start and End Date Input -->
+        <MatDatePicker Label="Start Date" @bind-Value="startDate"  OnInput="@UpdateStartDate" Maximum="@DateTime.Now" ></MatDatePicker>
+        <MatDatePicker Label="End Date" @bind-Value="endDate" OnInput="@UpdateEndDate" Minimum="@startDate" Maximum="@DateTime.Now"></MatDatePicker>
+
         @if (string.IsNullOrEmpty(SearchTerm))
         {
             <span class="search-icon">
@@ -86,20 +92,9 @@
     </div>
 
 @code {
-    private void UpdateSearchTermString(ChangeEventArgs e)
-    {
-        SearchTerm = e.Value.ToString();
-    }
-    private string? searchTerm;
-    private string? SearchTerm{
-        get{
-            return searchTerm;
-            }
-        set{
-            searchTerm=value;
-            PerformSearch(value);
-        }
-    }
+ 
+
+   
     private string currentUser = "Admin";
     private bool showAddHashtagPopup = false;
     private bool showUserActivity = false;
@@ -115,6 +110,56 @@
     private void CloseUserPopup()
     {
         showUserPopup = false;
+    }
+
+    private DateTime? _startDate;
+
+private DateTime? startDate 
+{
+    get 
+    {
+        return _startDate;
+    } 
+    set 
+    {
+        _startDate = value;
+        PerformSearch(searchTerm);
+        StateHasChanged();
+    }
+}
+
+private DateTime? _endDate;
+
+private DateTime? endDate 
+{
+    get 
+    {
+        return _endDate;
+    } 
+    set 
+    {
+        _endDate = value;
+        PerformSearch(searchTerm);
+    }
+}
+
+
+    private void UpdateStartDate(ChangeEventArgs e)
+    {
+        if (DateTime.TryParse(e.Value.ToString(), out var date))
+        {
+            startDate = date;
+            PerformSearch(searchTerm);
+        }
+    }
+
+    private void UpdateEndDate(ChangeEventArgs e)
+    {
+        if (DateTime.TryParse(e.Value.ToString(), out var date))
+        {
+            endDate = date;
+            PerformSearch(searchTerm);
+        }
     }
 
     protected override async Task OnInitializedAsync()
@@ -143,9 +188,28 @@
 
                 users.Add(searchLog);
             }
+            
             users.Sort((a, b) => b.Date.CompareTo(a.Date));
+            startDate = users.Last().Date;
+            _endDate = DateTime.Now;
+            SearchTerm=string.Empty;
             logs = users;
             GetUsernames();
+   
+        }
+    } 
+    private void UpdateSearchTermString(ChangeEventArgs e)
+    {
+        SearchTerm = e.Value.ToString();
+    }
+    private string? searchTerm;
+    private string? SearchTerm{
+        get{
+            return searchTerm;
+            }
+        set{
+            searchTerm=value;
+            PerformSearch(value);
         }
     }
 
@@ -176,11 +240,19 @@
 
     }
     private void PerformSearch(string value)
-    {
-        value = value?.Trim();
-        logs = users.Where(x => x.ActionDetail.ToLowerInvariant().Contains(value.ToLowerInvariant())).ToList();
-        StateHasChanged();
-    }
+{
+    value = value?.Trim();
+    Console.WriteLine("startdate"+startDate?.Date);
+    Console.WriteLine("enddate"+endDate?.Date);
+    logs = users.Where(x => x.ActionDetail != null 
+    && x.Date != null && startDate != null && endDate != null 
+    && x.ActionDetail.ToLowerInvariant().Contains(value.ToLowerInvariant()) 
+    && x.Date.Date >= startDate?.Date.AddDays(1) && x.Date.Date <= endDate?.Date.AddDays(1)).ToList();
+
+   
+    StateHasChanged();
+}
+
     private List<SearchLog> logs = new List<SearchLog>();
     private void OpenAddHashtagPopup()
     {
