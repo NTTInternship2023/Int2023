@@ -51,11 +51,13 @@ namespace SearchTheWebServer.Controller
                 user.PasswordSalt = passwordSalt;
                 //Creating the entity for the db
                 User newUser = new User { Username = userDto.Username, Email = userDto.Email, PasswordHash = user.PasswordHash, PasswordSalt = user.PasswordSalt };
-
+                
+                
+                
                 //Adding and saving the entity for the db
                 _context.Users.Add(newUser);
                 await _context.SaveChangesAsync();
-
+                
                 return Ok($"New user created! Welcome, {newUser.Username}!");
             }
             catch (Exception ex)
@@ -90,6 +92,16 @@ namespace SearchTheWebServer.Controller
                 loginStatus.Status= true;
                 loginStatus.IsAdmin= existingUser.IsAdmin;
                 loginStatus.Message= "Succesful Login";
+                var log = new SearchLog
+                {
+                    IdUser = loginStatus.Id ,
+                    Date = DateTime.Now,
+                    Action = "login",
+                    ActionDetail = loginStatus.Username
+                };
+                _context.SearchLogs.Add(log);
+                await _context.SaveChangesAsync();
+                
                 return loginStatus;
                 
             }
