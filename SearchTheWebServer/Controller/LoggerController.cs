@@ -90,7 +90,7 @@ public ActionResult<IEnumerable<LogItem>> GetLogItems(int? limit = null)
 {
     try
     {
-        var logItems = _db.SearchLogs
+        var logItems = _db.SearchLogs.Where(log => log.Action == "Search")
             .AsEnumerable() // Perform client-side evaluation
             .GroupBy(log => new { log.ActionDetail, WeekNumber = GetWeekNumber(log.Date) })
             .Select(group => new LogItem
