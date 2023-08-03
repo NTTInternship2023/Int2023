@@ -1,69 +1,71 @@
-@page "/search"
+﻿@page "/search"
 @inject HttpClient Http
 @inject NavigationManager NavigationManager
 @inject ILocalStorageService _localstorage
 @using System.Text
 @using System.Net.Http
 @using System.Text.Json
+@using System.Globalization;
+@using static SearchTheWeb.Pages.Index.Index;
+
 
 <PageTitle>Search Hashtag</PageTitle>
 
 <head>
     <link rel="stylesheet" href="css/search.css" />
 </head>
-
+<div class="languages">
+    <div class="lang @currentLanguage"></div>
+    <MatSelect @bind-Value="@currentLanguage" Label="Selected Language">
+        <MatOptionString Value="US">English</MatOptionString>
+        <MatOptionString Value="DE">Deutsch</MatOptionString>
+        <MatOptionString Value="ES">Espagnol</MatOptionString>
+        <MatOptionString Value="RO">Romania</MatOptionString>
+    </MatSelect>
+</div>
 
 <h1 class="search-heading">Search Title</h1>
 
+
 <form class="search-form">
-    <div class="search-bar">
-        <input id="searchBox" type="text" list="txtsearch" @oninput="@UpdateSearchTermString" placeholder="Enter your search term"/>
-        <datalist id="txtsearch">
-            @if (lista != null)
-            {
-                foreach(var item in lista){
-                    <option>@item</option>
-                }    
-            }
-            
-        </datalist>
-        <br> -Start Year-
-        <input type="text" class="form-control search-input" id="StartYear" @bind="@StartYear" placeholder="Start Year" />
-        -End Year-
-        <input type="text" class="form-control search-input" id="endYear" @bind="@EndYear" />
-        -Sortare-
-        <select class="form-control search-input" @bind="@Sort">
-            <option>incr</option>
-            <option>decr</option>
-        </select>
-        -Tipul-
-        <select class="form-control search-input" @bind="@TitleType">
-            <option value="movie,tvSeries">All</option>
-            <option value="movie">movie</option>
-            <option value="tvSeries">tvSeries</option>
-        </select>
+
+    <div class="mb-search">
+        <MatAutocompleteList  FullWidth="false" Items="@lista" TItem="string" Label="Enter your title here"
+                             OnTextChanged="UpdateSearchTermString" ></MatAutocompleteList><MatIconButton Icon="search" @onclick="PerformSearch"></MatIconButton>
     </div>
-    <div class="nav-item px-3">
-        <div class="form-group">
-            <label class="nav-link language-label" for="languageSelect">Select Language:</label>
-            <select @bind="@currentLanguage" class="form-control" id="languageSelect">
-                @foreach (var language in languages)
-                {   
-                    <option value="@language.Key" >@language.Value </option>
-                }
-            </select>
-        </div>
-    </div>
-    <br/>   
-    <button type="button" class="btn btn-primary search-button" @onclick="PerformSearch">Search</button>
 </form>
+
+<div class="row-container">
+
+    <b>Advanced search:</b>
+    <MatTextField @bind-Value="@StartYear" Label="Start Year"></MatTextField>
+
+    <MatTextField @bind-Value="@EndYear" Label="End Year"></MatTextField>
+
+    <MatSelect Label="Sort by" @bind-Value="@Sort" Enhanced="false">
+        <MatOptionString Value="incr">Oldest Realeased</MatOptionString>
+        <MatOptionString Value="decr">Latest Realeased</MatOptionString>
+    </MatSelect>
+
+    <MatSelect Label="Type" @bind-Value="@TitleType">
+        <MatOptionString Value="movie,tvSeries">Movies & Tv Series</MatOptionString>
+        <MatOptionString Value="movie">Movies</MatOptionString>
+        <MatOptionString Value="tvSeries">Tv Series</MatOptionString>
+    </MatSelect>
+
+</div>
+
+
+
 
 
 @if (!showUserPopup)  // Display hashtags only if user popup is not shown
 {
     if (IsLoading)
     {
-        <p style="text-align: center; padding: 20px;"><em>Loading...</em></p>
+        <p style=" display: flex;justify-content: center; align-items: center; padding-top:20px">Loading...     <MatProgressCircle Indeterminate="true" FourColored="true" Size="MatProgressCircleSize.Small" /></p>
+    
+       
     }
     else if (noResult)
     {
@@ -74,52 +76,56 @@
         <div class="hashtag-container">
             @foreach (var movie in movies)
             {
-                
+
                 <div class="hashtag-box">
                     <div class="image-container">
-                        <div class="container" >
+                        <div class="container">
                             <img class="image" src="/images/icons8-ribbon-nomination-100.png" alt="Imagine">
                             <span class="number_nomination">@movie.nomination</span>
                             <img class="image" src="/images/icons8-ribbon-award-100.png" alt="Imagine">
                             <span class="number_award">@movie.award</span>
                         </div>
                         <img src="@movie.imageUrl" alt="Hashtag Photo" class="hashtag-image" />
-                        
+
                     </div>
                     <div class="movie-info">
                         <h3>@movie.regionalTitles[currentLanguage]</h3>
                         <p>Release year: @movie.releaseYear</p>
                         <p>  <div class="stars"><span class="tooltiptext">@movie.numVotes votes</span><div class="percent" style="width:@ReturnStarRating(movie.rating);"></div></div></p>
-                        </div>
                     </div>
+                </div>
             }
         </div>
     }
 }
 
 @code {
-    private void UpdateSearchTermString(ChangeEventArgs args)
+
+
+    private void UpdateSearchTermString(string args)
     {
-        SearchTermString = args.Value.ToString();
+        SearchTermString = args;
     }
     private SearchTerm[]? allHashtags;
     private SearchTerm[]? hashtags;
     private List<string>? lista = new List<string>();
     private List<Movie> movies = new List<Movie>();
     private string? searchTerm = string.Empty;
-    private string? SearchTermString{
-        get {
-        return searchTerm;
-    }
-        set {
-        if(value!=null){
-           Task.Run( async() => await GetSearchSuggestions(value));
-            searchTerm=value;
+    private string? SearchTermString
+    {
+        get
+        {
+            return searchTerm;
         }
-    }}
-    
-    
-    
+        set
+        {
+            searchTerm = value;
+            Task.Run(async () => await GetSearchSuggestions(value));
+        }
+    }
+
+
+
     private string currentLanguage = "US";
     private Dictionary<string, string> languages = new Dictionary<string, string>()
     {
@@ -128,19 +134,10 @@
         { "DE", "Deutsch" },
         { "ES", "Espanol" }
     };
-    
-    private Dictionary<string, string> languageIcons = new Dictionary<string, string>()
-    {
-        { "US", "images/united-states.png" },
-        { "RO", "images/romania.png" },
-        { "DE", "images/germany.png" },
-        { "ES", "images/spain.png" }
-    };
-    
     private int StartYear;
     private string? Sort = "incr";
-    private string? TitleType;
-    private int EndYear=2024;
+    private string? TitleType = "movie,tvSeries";
+    private int EndYear = 2024;
     private string currentUser = "N/A";
     private bool showUserPopup = false;
     private bool noResult;
@@ -151,19 +148,45 @@
     {
         // Initialize data
         noResult = false;
-        allHashtags = await Http.GetFromJsonAsync<SearchTerm[]>("/sample-data/weather.json");
-        hashtags = allHashtags;
         lista = new List<string>();
-        movies=new List<Movie>();
-        localId = await _localstorage.GetItemAsync<int?>("id")??20;
+        movies = new List<Movie>();
+        localId = await _localstorage.GetItemAsync<int?>("id") ?? 20;
+        SearchTermString = null;
         currentUser = await _localstorage.GetItemAsync<string>("username");
     }
 
+    static readonly CultureInfo _ci = CultureInfo.CurrentCulture;
+    readonly int _currentWeekNumber = _ci.Calendar.GetWeekOfYear(DateTime.Now, CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday);
 
-    private async Task GetSearchSuggestions(string? searchTerm = null)
-    { 
+    private async Task GetSearchSuggestions(string? searchTerm)
+    {
         try
         {
+            searchTerm = searchTerm?.Trim();
+            if (string.IsNullOrEmpty(searchTerm))
+            {
+
+                List<SearchData> _searchDatas = new List<SearchData>();
+                using (var httpClient = new HttpClient())
+                {
+                    var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7194/Logger/SearchAction");
+                    var response = await httpClient.SendAsync(request);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var responseContent = await response.Content.ReadAsStringAsync();
+                        var searchDatas = JsonSerializer.Deserialize<List<SearchData>>(responseContent);
+                        _searchDatas = searchDatas!;
+                    }
+
+                    _searchDatas = _searchDatas.Where(x => x.weekNumber == _currentWeekNumber).ToList();
+                    _searchDatas = _searchDatas.Take(7).ToList();
+
+                    lista = _searchDatas.Select(x => x.keyword).ToList();
+                    StateHasChanged();
+                }
+
+            }
+
             if (!string.IsNullOrEmpty(searchTerm))
             {
                 using(var httpClient = new HttpClient())
@@ -172,7 +195,7 @@
                     var response = await httpClient.SendAsync(request);
                     response.EnsureSuccessStatusCode();
                     var result = await response.Content.ReadFromJsonAsync<List<string>>();
-                    
+
                     if(result!=null){
                         if(result.Count>10){
                             result=result.GetRange(0,10);
@@ -193,59 +216,68 @@
 
     private async void PerformSearch()
     {
-        HttpClient client=new HttpClient();
-        var jsonContent= new{
-            Title= searchTerm,
-            StartYear=StartYear,
-            sort=Sort,
-            TitleType=TitleType,
-            EndYear=EndYear,
-            IdUser=localId //modificat sa foloseasca id user logat
+        HttpClient client = new HttpClient();
+        var jsonContent = new
+        {
+            Title = searchTerm,
+            StartYear = StartYear,
+            sort = Sort,
+            TitleType = TitleType,
+            EndYear = EndYear,
+            IdUser = localId //modificat sa foloseasca id user logat
         };
 
         if (!string.IsNullOrEmpty(jsonContent.Title))
         {
             string jsonString = JsonSerializer.Serialize(jsonContent);
 
-            HttpContent content=new StringContent(jsonString,Encoding.UTF8,"application/json");
+            HttpContent content = new StringContent(jsonString, Encoding.UTF8, "application/json");
 
             IsLoading = true;
             HttpResponseMessage response = await client.PostAsync("https://localhost:7194/api/User/Filter", content);
-            
-            if(response.IsSuccessStatusCode){
+
+            if (response.IsSuccessStatusCode)
+            {
                 var responseContent = await response.Content.ReadAsStringAsync();
 
-                movies=JsonSerializer.Deserialize<List<Movie>>(responseContent);
-                
+                movies = JsonSerializer.Deserialize<List<Movie>>(responseContent);
+
                 //Set movies regional titles in US to title
-                foreach(var movie in movies){
-                    movie.regionalTitles["US"]=movie.title;
-                }
-                
-                foreach(var movie in movies)
+                foreach (var movie in movies)
                 {
-                    try{
+                    movie.regionalTitles["US"] = movie.title;
+                }
+
+                foreach (var movie in movies)
+                {
+                    try
+                    {
                         var newRequest = new HttpRequestMessage(HttpMethod.Get, $"https://localhost:7194/api/User/awards/{movie.id}");
                         var newResponse = await client.SendAsync(newRequest);
-                        
-                        if(newResponse.IsSuccessStatusCode)
+
+                        if (newResponse.IsSuccessStatusCode)
                         {
                             var newResponseContent = await newResponse.Content.ReadAsStringAsync();
-                            Nom rez=JsonSerializer.Deserialize<Nom>(newResponseContent);
+                            Nom rez = JsonSerializer.Deserialize<Nom>(newResponseContent);
 
-                            movie.nomination=rez.numberOfNominations;
-                            movie.award=rez.numberOfWins;
+                            movie.nomination = rez.numberOfNominations;
+                            movie.award = rez.numberOfWins;
                         }
-                    }catch(Exception ex){
+                    }
+                    catch (Exception ex)
+                    {
                         Console.WriteLine(ex.ToString());
                     }
                 }
-                IsLoading = false;
+                StateHasChanged();
             }
-            else{
+            else
+            {
                 Console.WriteLine("Error");
             }
-        } else 
+
+        }
+        else
         {
             noResult = true;
         }
@@ -255,34 +287,34 @@
         StateHasChanged();
     }
 
-    
+
     public string ReturnStarRating(double? rating)
 
     {
         string starRating = "0%";
-        if(rating!=null)
+        if (rating != null)
         {
             rating *= 10;
             starRating = rating.ToString() + "%";
         }
-       
+
         return starRating;
 
     }
 
     public class Movie
     {
-        public string? id{get; set;}
-        public string? title{get;set;}
+        public string? id { get; set; }
+        public string? title { get; set; }
         public string? imageUrl { get; set; }
         public int releaseYear { get; set; }
         public double rating { get; set; }
-        public int? nomination=0;
-        public int? award=0;
+        public int? nomination = 0;
+        public int? award = 0;
         public int numVotes { get; set; }
         public Dictionary<string, string?>? regionalTitles { get; set; }
     }
-      
+
     public class SearchTerm
     {
         public DateTime Date { get; set; }
@@ -292,9 +324,8 @@
     }
     public class Nom
     {
-        public int numberOfNominations {get; set;}
-        public int numberOfWins {get; set;}
+        public int numberOfNominations { get; set; }
+        public int numberOfWins { get; set; }
     }
 
 }
-
