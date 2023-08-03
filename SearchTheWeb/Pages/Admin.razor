@@ -39,7 +39,12 @@
         <!-- Start and End Date Input -->
         <MatDatePicker Label="Start Date" @bind-Value="startDate"  OnInput="@UpdateStartDate" Maximum="@DateTime.Now" ></MatDatePicker>
         <MatDatePicker Label="End Date" @bind-Value="endDate" OnInput="@UpdateEndDate" Minimum="@startDate" Maximum="@DateTime.Now"></MatDatePicker>
-
+        <MatSelect Label="Filter by action" @bind-Value="@ActionFilter">
+            <MatOptionString Value="search login change password">All</MatOptionString>
+            <MatOptionString Value="login">Login</MatOptionString>
+            <MatOptionString Value="change password">Change password</MatOptionString>
+            <MatOptionString Value="search">Search</MatOptionString>
+        </MatSelect>
         @if (string.IsNullOrEmpty(SearchTerm))
         {
             <span class="search-icon">
@@ -92,9 +97,15 @@
     </div>
 
 @code {
- 
-
-   
+    private string _actionFilter = "search login change password";
+    private string ActionFilter {get{
+        return _actionFilter;
+    } 
+    set{
+        _actionFilter = value;
+        PerformSearch(searchTerm);
+    }
+    }
     private string currentUser = "Admin";
     private bool showAddHashtagPopup = false;
     private bool showUserActivity = false;
@@ -245,7 +256,8 @@ private DateTime? endDate
     logs = users.Where(x => x.ActionDetail != null 
     && x.Date != null && startDate != null && endDate != null 
     && x.ActionDetail.ToLowerInvariant().Contains(value.ToLowerInvariant()) 
-    && x.Date.Date >= startDate?.Date.AddDays(1) && x.Date.Date <= endDate?.Date.AddDays(1)).ToList();
+    && x.Date.Date >= startDate?.Date.AddDays(1) && x.Date.Date <= endDate?.Date.AddDays(1)
+    && ActionFilter.Contains(x.Action)).ToList();
 
    
     StateHasChanged();
