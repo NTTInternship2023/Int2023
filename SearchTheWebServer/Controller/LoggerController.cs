@@ -84,13 +84,13 @@ namespace SearchTheWebServer.Controller
         }
 
         // Add the new endpoint
-  [HttpGet]
-[Route("SearchAction")]
+        [HttpGet]
+        [Route("SearchAction")]
 public ActionResult<IEnumerable<LogItem>> GetLogItems(int? limit = null)
 {
     try
     {
-        var logItems = _db.SearchLogs.Where(log => log.Action == "Search")
+                var logItems = _db.SearchLogs.Where(x => x.Action.Equals("search"))
             .AsEnumerable() // Perform client-side evaluation
             .GroupBy(log => new { log.ActionDetail, WeekNumber = GetWeekNumber(log.Date) })
             .Select(group => new LogItem
