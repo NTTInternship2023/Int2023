@@ -17,7 +17,7 @@ namespace SearchTheWebServer.Controller
     [ApiController]
     public partial class UserController : ControllerBase
     {
-        private string ApiKey { get; } = "c3eb1fafacmshc5fd818a156e962p1af460jsnc0f24ca50442";
+        private string ApiKey { get; } = "c34b6bf5bamsh03b15b5f8543148p17f7eejsn467adb90360f";
         private string ApiHost { get; } = "moviesdatabase.p.rapidapi.com";
 
         private readonly AppDbContext _context;
