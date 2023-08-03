@@ -131,6 +131,14 @@ namespace SearchTheWebServer.Controller
                 CreatePasswordHash(userDto.NewPassword, out byte[] passwordHash, out byte[] passwordSalt);
                 updatedUser.PasswordHash = passwordHash;
                 updatedUser.PasswordSalt = passwordSalt;
+                var searchLog = new SearchLog
+                {
+                    IdUser =updatedUser.Id ,
+                    Date = DateTime.Now,
+                    Action = "change password",
+                    ActionDetail ="Restricted!!"
+                };
+                _context.SearchLogs.Add(searchLog);
                 await _context.SaveChangesAsync();
                 return Ok(updatedUser);
             }
