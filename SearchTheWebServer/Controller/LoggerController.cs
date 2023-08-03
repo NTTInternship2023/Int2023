@@ -52,7 +52,7 @@ namespace SearchTheWebServer.Controller
         [Route("Suggestions")]
         public async Task<ActionResult<HashSet<string>>> GetSearchSuggestions( string hint)
         {
-            var searchSuggestions = (await _db.SearchLogs.Where(w => w.ActionDetail.StartsWith(hint)).ToListAsync()).ToList();
+            var searchSuggestions = (await _db.SearchLogs.Where(w => w.ActionDetail.Contains(hint)).ToListAsync()).ToList();
             HashSet<string> suggestions = new HashSet<string>();
             foreach (var search in searchSuggestions){
                 suggestions.Add(search.ActionDetail);

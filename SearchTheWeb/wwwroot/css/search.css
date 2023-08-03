@@ -23,7 +23,9 @@
 }
 
 .search-input {
-    width: 100%;
+    /* width: 200px;  Adjust the width to make the input/select elements 40px long */
+    max-width: 100%; /* Ensures the elements don't exceed the container's width */
+    /* padding: 5px;  Adds padding inside the input/select elements */
 }
 
 .hashtag-container {
@@ -175,4 +177,55 @@ container {
 .no-results-found{
     margin: 20px;
     text-align: center;
+}
+.p {
+    padding-top: 50px;
+    text-align:center;
+    font-size:medium;
+    
+}
+.row-container {
+    padding-top: 20px;
+    padding-left: 20px;
+    padding-right: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 40px;
+}
+
+.mb-search {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.languages {
+    position: fixed;
+    display:inline-flex;
+    right: 0;
+}
+.lang{
+    height:56px;
+    width:85px;
+}
+.US {
+    background-image: url("https://th.bing.com/th/id/OIP.o6qGMJjK3eeBHQYMGaV3pQHaEC?pid=ImgDet&rs=1");
+    background-size: cover;
+    object-fit: scale-down;
+}
+.DE {
+    background-image: url("https://www.publicdomainpictures.net/pictures/340000/velka/flag-of-germany-1588673048vhH.jpg");
+  background-size: cover;
+    object-fit: scale-down;
+}
+.RO {
+    background-image: url("https://th.bing.com/th/id/OIP.yymBVdZSreUtB7ZbSgYh1AHaE8?pid=ImgDet&rs=1");
+    background-size: cover;
+    object-fit: scale-down;
+}
+.ES {
+    background-image: url("https://live.staticflickr.com/3710/13841559615_860b3a23af_n.jpg");
+    background-size: cover;
+    object-fit: scale-down;
 }

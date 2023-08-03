@@ -6,6 +6,7 @@
 @using System.Text.Json
 @inject HttpClient HttpClient
 
+@namespace SearchTheWeb.Pages.Index
 
 <head>
     <link rel="stylesheet" href="css/index.css" />
@@ -83,7 +84,7 @@
 @code {
     static readonly CultureInfo _ci = CultureInfo.CurrentCulture;
     readonly int _currentWeekNumber = _ci.Calendar.GetWeekOfYear(DateTime.Now, CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday);
-    private class SearchData
+    public class SearchData
     {
         public string keyword { get; set; } = string.Empty;
         public int totalSearches { get; set; }
