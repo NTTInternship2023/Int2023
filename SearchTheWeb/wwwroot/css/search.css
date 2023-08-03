@@ -140,6 +140,7 @@ container {
 
 .image-container {
     display: flex;
+    overflow: hidden;
     align-items: center;
     margin-right: 30px; /* Ajustează spațiul dintre cele două imagini */
     margin-left:-20px;

@@ -232,9 +232,11 @@ private DateTime? endDate
             var match = data.FirstOrDefault(val => val.idUser == ceva.IdUser);
             
             if(match!=null){
-                ceva.Username=match.username;
-                
+                ceva.Username=string.IsNullOrEmpty(match.username)?"[Deleted User]":match.username;
             }
+             else{
+                ceva.Username="[Deleted User]";
+            }   
         }
         StateHasChanged();
 
