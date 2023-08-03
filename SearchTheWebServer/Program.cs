@@ -35,8 +35,9 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    // This might cause the CORS error
+    // app.UseSwagger();
+    // app.UseSwaggerUI();
 }
 
 app.Use((ctx,next)=>{
